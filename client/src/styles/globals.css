@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-1 text-slate-900 dark:bg-surface-dark-0 dark:text-slate-100;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-500;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white dark:bg-surface-dark-1 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:shadow-md hover:border-brand-300 dark:hover:border-brand-600 cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2.5 bg-slate-100 dark:bg-surface-dark-2 hover:bg-slate-200 dark:hover:bg-surface-dark-3 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-all duration-150 active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-150 active:scale-[0.98];
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-blue {
+    @apply badge bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300;
+  }
+
+  .badge-green {
+    @apply badge bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300;
+  }
+
+  .badge-amber {
+    @apply badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300;
+  }
+
+  .badge-red {
+    @apply badge bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2.5 bg-white dark:bg-surface-dark-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all;
+  }
+
+  .progress-bar {
+    @apply h-2 bg-slate-200 dark:bg-surface-dark-2 rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full bg-brand-500 rounded-full transition-all duration-500 ease-out;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-dark-2;
+  }
+
+  .nav-item-active {
+    @apply nav-item bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-900/50;
+  }
+
+  /* Circuit simulator styles */
+  .circuit-grid {
+    background-image:
+      radial-gradient(circle, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .dark .circuit-grid {
+    background-image:
+      radial-gradient(circle, rgba(71, 85, 105, 0.4) 1px, transparent 1px);
+  }
+
+  .wire-path {
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .component-glow {
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
+  }
+
+  /* Tooltip */
+  .tooltip {
+    @apply invisible absolute z-50 px-2 py-1 text-xs font-medium text-white bg-slate-800 dark:bg-slate-200 dark:text-slate-800 rounded shadow-lg whitespace-nowrap;
+  }
+
+  .tooltip-trigger:hover .tooltip {
+    @apply visible;
+  }
+}
+
+/* Animations for lab elements */
+@keyframes current-flow {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.current-animated {
+  stroke-dasharray: 5, 15;
+  animation: current-flow 0.5s linear infinite;
+}
+
+/* Electrical symbol styling */
+.symbol-line {
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
