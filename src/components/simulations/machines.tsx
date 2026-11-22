@@ -346,3 +346,171 @@ export function StarDeltaSim() {
     </SimShell>
   );
 }
+
+/* ============================================================
+   MODULE 14 — DC Generator: EMF & magnetisation curve
+   ============================================================ */
+export function DCGeneratorSim() {
+  const L = useLang();
+  const [flux, setFlux] = useState(60);     // % of rated flux (field current proxy)
+  const [speed, setSpeed] = useState(1500); // rpm
+  const poles = 4, Z = 400, A = 4;
+  // saturation: usable flux saturates as field current rises
+  const effFlux = (1 - Math.exp(-flux / 35)) * 0.012; // Wb
+  const emf = (poles * effFlux * Z * speed) / (60 * A);
+
+  return (
+    <SimShell
+      accent={THEMES.dcmachine.accent} Icon={THEMES.dcmachine.Icon}
+      title={L('DC Generator — EMF Build-up', 'DC जनरेटर — EMF निर्माण')}
+      subtitle={L('E = PΦZN/60A. EMF rises with flux and speed, but the iron saturates so more field current gives less extra voltage.',
+        'E = PΦZN/60A। EMF फ्लक्स व गति से बढ़ती है, पर लोहा संतृप्त होने से अधिक फील्ड धारा कम अतिरिक्त वोल्टेज देती है।')}
+      controls={<div className="grid sm:grid-cols-2 gap-3">
+        <Slider label={L('Field current (flux)', 'फील्ड धारा (फ्लक्स)')} value={flux} min={5} max={100} unit=" %" color={THEMES.dcmachine.accent} onChange={setFlux} />
+        <Slider label={L('Speed', 'गति')} value={speed} min={300} max={2500} step={50} unit=" rpm" color="#ef4444" onChange={setSpeed} />
+      </div>}
+    >
+      <SimCanvas height={190} running={false} draw={({ ctx, w, h, dark }) => {
+        const p = palette(dark); drawGrid(ctx, w, h, dark, 26);
+        const m = 30, pw = w - 2 * m, ph = h - 2 * m;
+        ctx.strokeStyle = p.axis; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(m, m); ctx.lineTo(m, m + ph); ctx.lineTo(m + pw, m + ph); ctx.stroke();
+        // magnetisation (saturation) curve: EMF vs field current at this speed
+        ctx.strokeStyle = THEMES.dcmachine.accent; ctx.lineWidth = 2.5; ctx.beginPath();
+        const emfAt = (f: number) => (poles * ((1 - Math.exp(-f / 35)) * 0.012) * Z * speed) / (60 * A);
+        const maxE = emfAt(100);
+        for (let f = 0; f <= 100; f += 2) { const x = m + (f / 100) * pw; const y = m + ph - (emfAt(f) / (maxE * 1.05)) * ph; f === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+        ctx.stroke();
+        // operating point
+        const ox = m + (flux / 100) * pw, oy = m + ph - (emf / (maxE * 1.05)) * ph;
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(ox, oy, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(239,68,68,0.5)'; ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, m + ph); ctx.moveTo(ox, oy); ctx.lineTo(m, oy); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = p.sub; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(L('field current →', 'फील्ड धारा →'), m + pw / 2, m + ph + 14);
+        ctx.save(); ctx.translate(12, m + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('EMF', 0, 0); ctx.restore();
+      }} />
+      <div className="grid grid-cols-3 gap-2">
+        <Readout label={L('Generated EMF', 'उत्पन्न EMF')} value={emf.toFixed(0)} unit=" V" color={THEMES.dcmachine.accent} sub="PΦZN/60A" />
+        <Readout label={L('Flux', 'फ्लक्स')} value={(effFlux * 1000).toFixed(1)} unit=" mWb" color="#f59e0b" />
+        <Readout label={L('Speed', 'गति')} value={speed} unit=" rpm" color="#ef4444" />
+      </div>
+    </SimShell>
+  );
+}
+
+/* ============================================================
+   MODULE 19 — Synchroscope / paralleling alternators
+   ============================================================ */
+export function SynchroscopeSim() {
+  const L = useLang();
+  const [df, setDf] = useState(1.2);  // incoming freq − bus freq (Hz)
+  const [dv, setDv] = useState(0);    // voltage difference (%)
+  const inSync = Math.abs(df) < 0.15 && Math.abs(dv) < 3;
+
+  return (
+    <SimShell
+      accent={THEMES.sync.accent} Icon={THEMES.sync.Icon}
+      title={L('Synchronising an Alternator', 'अल्टरनेटर सिंक्रोनाइज़िंग')}
+      subtitle={L('Before closing the breaker, match frequency and voltage. The synchroscope pointer slows as frequencies match; when it stops at the top, close in.',
+        'ब्रेकर बंद करने से पहले आवृत्ति व वोल्टेज मिलाएं। आवृत्ति मिलने पर सिंक्रोस्कोप पॉइंटर धीमा होता है; ऊपर रुकने पर बंद करें।')}
+      controls={<div className="grid sm:grid-cols-2 gap-3">
+        <Slider label={L('Frequency difference', 'आवृत्ति अंतर')} value={df} min={-2} max={2} step={0.05} unit=" Hz" color={THEMES.sync.accent} onChange={setDf} />
+        <Slider label={L('Voltage difference', 'वोल्टेज अंतर')} value={dv} min={-15} max={15} step={1} unit=" %" color="#ef4444" onChange={setDv} />
+      </div>}
+    >
+      <SimCanvas height={210} running draw={({ ctx, w, h, t, dark }) => {
+        const p = palette(dark); drawGrid(ctx, w, h, dark, 26);
+        // synchroscope dial (left)
+        const cx = w * 0.3, cy = h * 0.5, R = Math.min(w * 0.22, h * 0.4);
+        ctx.strokeStyle = p.axis; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = inSync ? '#16a34a' : p.sub; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(L('SLOW', 'धीमा'), cx - R - 6, cy); ctx.fillText(L('FAST', 'तेज'), cx + R + 8, cy);
+        // pointer rotates at speed ∝ df
+        const ang = -Math.PI / 2 + t * df * 1.6;
+        ctx.strokeStyle = inSync ? '#16a34a' : THEMES.sync.accent; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(ang) * (R - 8), cy + Math.sin(ang) * (R - 8)); ctx.stroke();
+        ctx.fillStyle = p.text; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
+        // 12 o'clock mark
+        ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy - R + 8); ctx.stroke();
+        // three synchronising lamps (right)
+        const lampY = [h * 0.28, h * 0.5, h * 0.72]; const lx = w * 0.72;
+        lampY.forEach((ly, i) => {
+          // dark-lamp method: brightness ∝ phase difference, pulses with df
+          const bright = inSync ? 0.03 : Math.abs(Math.sin(t * df * 1.6 + i * 0.3)) * (0.4 + Math.abs(dv) / 30);
+          ctx.fillStyle = `rgba(250,204,21,${bright})`; ctx.beginPath(); ctx.arc(lx, ly, 18, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#eab308'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(lx, ly, 13, 0, Math.PI * 2); ctx.stroke();
+        });
+        ctx.fillStyle = p.sub; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(L('synchronising lamps', 'सिंक्रोनाइज़िंग लैंप'), lx, h * 0.9);
+        if (inSync) { ctx.fillStyle = '#16a34a'; ctx.font = 'bold 11px sans-serif'; ctx.fillText(L('✓ IN SYNC — close breaker', '✓ सिंक — ब्रेकर बंद करें'), w * 0.5, 16); }
+      }} />
+      <div className="grid grid-cols-3 gap-2">
+        <Readout label={L('Freq match', 'आवृत्ति मेल')} value={Math.abs(df) < 0.15 ? L('OK', 'ठीक') : L('adjust', 'समायोजित')} color={Math.abs(df) < 0.15 ? '#16a34a' : '#f59e0b'} sub={`Δf ${df.toFixed(2)} Hz`} />
+        <Readout label={L('Voltage match', 'वोल्टेज मेल')} value={Math.abs(dv) < 3 ? L('OK', 'ठीक') : L('adjust', 'समायोजित')} color={Math.abs(dv) < 3 ? '#16a34a' : '#f59e0b'} sub={`ΔV ${dv}%`} />
+        <Readout label={L('Breaker', 'ब्रेकर')} value={inSync ? L('CLOSE NOW', 'अभी बंद करें') : L('WAIT', 'रुकें')} color={inSync ? '#16a34a' : '#ef4444'} />
+      </div>
+    </SimShell>
+  );
+}
+
+/* ============================================================
+   MODULE 20 — Motor winding (lap/wave) visualiser
+   ============================================================ */
+export function MotorWindingSim() {
+  const L = useLang();
+  const [slots, setSlots] = useState(24);
+  const [poles, setPoles] = useState(4);
+  const [type, setType] = useState<'lap' | 'wave'>('lap');
+  const polePitch = Math.round(slots / poles);
+  const [coilSpan, setCoilSpan] = useState(polePitch);
+  const parallelPaths = type === 'lap' ? poles : 2;
+
+  return (
+    <SimShell
+      accent={THEMES.winding.accent} Icon={THEMES.winding.Icon}
+      title={L('Armature Winding — Lap vs Wave', 'आर्मेचर वाइंडिंग — लैप बनाम वेव')}
+      subtitle={L('Pole pitch = slots ÷ poles. A full-pitch coil spans one pole pitch. Lap winding gives P parallel paths; wave gives 2.',
+        'पोल पिच = स्लॉट ÷ ध्रुव। पूर्ण-पिच कॉइल एक पोल पिच घेरती है। लैप P समानांतर पथ देता है; वेव 2।')}
+      controls={<div className="space-y-3">
+        <Segmented value={type} onChange={setType} options={[
+          { value: 'lap', label: L('Lap', 'लैप') }, { value: 'wave', label: L('Wave', 'वेव') },
+        ]} />
+        <div className="grid sm:grid-cols-3 gap-3">
+          <Slider label={L('Slots', 'स्लॉट')} value={slots} min={8} max={36} step={2} color={THEMES.winding.accent} onChange={(v) => { setSlots(v); }} />
+          <Slider label={L('Poles', 'ध्रुव')} value={poles} min={2} max={8} step={2} color="#06b6d4" onChange={setPoles} />
+          <Slider label={L('Coil span', 'कॉइल स्पैन')} value={coilSpan} min={2} max={slots / 2} step={1} unit=" slots" color="#f59e0b" onChange={setCoilSpan} />
+        </div>
+      </div>}
+    >
+      <SimCanvas height={210} running draw={({ ctx, w, h, t, dark }) => {
+        const p = palette(dark); drawGrid(ctx, w, h, dark, 26);
+        const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 20;
+        // armature core
+        ctx.strokeStyle = p.axis; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, R * 0.45, 0, Math.PI * 2); ctx.stroke();
+        // slots
+        for (let i = 0; i < slots; i++) {
+          const a = (i / slots) * Math.PI * 2 - Math.PI / 2;
+          const x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
+          ctx.fillStyle = p.sub; ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+        }
+        // highlight one coil spanning coilSpan slots
+        const i0 = Math.floor((t * 0.3) % slots);
+        const i1 = (i0 + coilSpan) % slots;
+        const pt = (i: number, r: number) => { const a = (i / slots) * Math.PI * 2 - Math.PI / 2; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
+        const a0 = pt(i0, R), a1 = pt(i1, R), b0 = pt(i0, R * 0.45), b1 = pt(i1, R * 0.45);
+        ctx.strokeStyle = THEMES.winding.accent; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(a0[0], a0[1]); ctx.lineTo(b0[0], b0[1]);
+        if (type === 'lap') { ctx.lineTo(b1[0], b1[1]); } else { ctx.lineTo(cx, cy); ctx.lineTo(b1[0], b1[1]); }
+        ctx.lineTo(a1[0], a1[1]); ctx.stroke();
+        ctx.fillStyle = THEMES.winding.accent; [a0, a1].forEach((pp) => { ctx.beginPath(); ctx.arc(pp[0], pp[1], 4, 0, Math.PI * 2); ctx.fill(); });
+      }} />
+      <div className="grid grid-cols-3 gap-2">
+        <Readout label={L('Pole pitch', 'पोल पिच')} value={polePitch} unit={L(' slots', ' स्लॉट')} color={THEMES.winding.accent} sub="slots/poles" />
+        <Readout label={L('Coil span', 'कॉइल स्पैन')} value={`${coilSpan}`} unit={L(' slots', ' स्लॉट')} color="#f59e0b" sub={coilSpan >= polePitch ? L('full pitch', 'पूर्ण पिच') : L('short pitch', 'लघु पिच')} />
+        <Readout label={L('Parallel paths', 'समानांतर पथ')} value={parallelPaths} color="#06b6d4" sub={type === 'lap' ? 'A = P' : 'A = 2'} />
+      </div>
+    </SimShell>
+  );
+}

@@ -4,6 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/context/store';
 import { getModuleSimulation } from '@/components/simulations';
 import { moduleContentData } from '@/data/moduleContentData';
+import { moduleTheme } from '@/data/moduleMeta';
+import { withAlpha } from '@/components/simulations/theme';
+import {
+  Video, BookOpen, Dumbbell, FlaskConical, ClipboardCheck, Wrench, RefreshCw,
+  Check, X, Play, SearchX, ListChecks, Sigma, Send, RotateCcw, Globe,
+  AlertTriangle, PartyPopper, FileText, Lightbulb, type LucideIcon,
+} from 'lucide-react';
 
 // Detailed content for each module's 7-stage learning journey
 const moduleContent: Record<number, {
@@ -343,14 +350,14 @@ function getDefaultContent(outcome: { id: number; title: string; titleHi: string
   };
 }
 
-const STAGES = [
-  { key: 'watch', icon: '📺', en: 'Watch', hi: 'देखें', desc: { en: 'Video explanation of concepts', hi: 'अवधारणाओं की वीडियो व्याख्या' } },
-  { key: 'read', icon: '📖', en: 'Read', hi: 'पढ़ें', desc: { en: 'Detailed theory and notes', hi: 'विस्तृत सिद्धांत और नोट्स' } },
-  { key: 'practice', icon: '✏️', en: 'Practice', hi: 'अभ्यास', desc: { en: 'Solve problems and exercises', hi: 'समस्याएं और अभ्यास हल करें' } },
-  { key: 'simulate', icon: '🔬', en: 'Simulate', hi: 'सिमुलेट', desc: { en: 'Virtual lab experiments', hi: 'वर्चुअल लैब प्रयोग' } },
-  { key: 'quiz', icon: '📝', en: 'Quiz', hi: 'क्विज़', desc: { en: 'Test your understanding', hi: 'अपनी समझ का परीक्षण करें' } },
-  { key: 'apply', icon: '🔧', en: 'Apply', hi: 'लागू करें', desc: { en: 'Real-world application scenarios', hi: 'वास्तविक दुनिया के अनुप्रयोग परिदृश्य' } },
-  { key: 'review', icon: '🔍', en: 'Review', hi: 'समीक्षा', desc: { en: 'Summary and revision', hi: 'सारांश और पुनरीक्षण' } },
+const STAGES: { key: string; Icon: LucideIcon; en: string; hi: string; desc: { en: string; hi: string } }[] = [
+  { key: 'watch', Icon: Video, en: 'Watch', hi: 'देखें', desc: { en: 'Video explanation of concepts', hi: 'अवधारणाओं की वीडियो व्याख्या' } },
+  { key: 'read', Icon: BookOpen, en: 'Read', hi: 'पढ़ें', desc: { en: 'Detailed theory and notes', hi: 'विस्तृत सिद्धांत और नोट्स' } },
+  { key: 'practice', Icon: Dumbbell, en: 'Practice', hi: 'अभ्यास', desc: { en: 'Solve problems and exercises', hi: 'समस्याएं और अभ्यास हल करें' } },
+  { key: 'simulate', Icon: FlaskConical, en: 'Simulate', hi: 'सिमुलेट', desc: { en: 'Virtual lab experiments', hi: 'वर्चुअल लैब प्रयोग' } },
+  { key: 'quiz', Icon: ClipboardCheck, en: 'Quiz', hi: 'क्विज़', desc: { en: 'Test your understanding', hi: 'अपनी समझ का परीक्षण करें' } },
+  { key: 'apply', Icon: Wrench, en: 'Apply', hi: 'लागू करें', desc: { en: 'Real-world application scenarios', hi: 'वास्तविक दुनिया के अनुप्रयोग परिदृश्य' } },
+  { key: 'review', Icon: RefreshCw, en: 'Review', hi: 'समीक्षा', desc: { en: 'Summary and revision', hi: 'सारांश और पुनरीक्षण' } },
 ];
 
 export default function ModuleDetail() {
@@ -367,7 +374,7 @@ export default function ModuleDetail() {
   if (!outcome) {
     return (
       <div className="text-center py-16">
-        <p className="text-6xl mb-4">🔍</p>
+        <SearchX className="w-14 h-14 mx-auto mb-4 text-slate-300" />
         <h2 className="text-xl font-bold mb-2">{language === 'hi' ? 'मॉड्यूल नहीं मिला' : 'Module Not Found'}</h2>
         <Link to="/modules" className="btn-primary text-sm px-4 py-2 mt-4 inline-block">
           ← {language === 'hi' ? 'मॉड्यूल पर वापस जाएं' : 'Back to Modules'}
@@ -379,6 +386,9 @@ export default function ModuleDetail() {
   const baseContent = moduleContent[outcomeId] || getDefaultContent(outcome);
   const extraContent = moduleContentData[outcomeId];
   const content = extraContent ? { ...baseContent, ...extraContent } : baseContent;
+  const theme = moduleTheme(outcomeId);
+  const HeaderIcon = theme.Icon;
+  const ActiveStageIcon = STAGES[activeStage].Icon;
 
   const handleStartLearning = () => {
     if (outcome.status === 'available') {
@@ -414,7 +424,9 @@ export default function ModuleDetail() {
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{content.icon}</span>
+            <span className="grid place-items-center w-12 h-12 rounded-2xl flex-shrink-0" style={{ background: withAlpha(theme.accent, 0.15), color: theme.accent }}>
+              <HeaderIcon size={24} strokeWidth={2.2} />
+            </span>
             <div>
               <h1 className="text-xl font-bold leading-tight">
                 {language === 'hi' ? outcome.titleHi : outcome.title}
@@ -427,13 +439,13 @@ export default function ModuleDetail() {
         </div>
         <div className="flex gap-2">
           {outcome.status === 'available' && (
-            <button onClick={handleStartLearning} className="btn-primary text-xs px-4 py-2">
-              {language === 'hi' ? '▶ शुरू करें' : '▶ Start'}
+            <button onClick={handleStartLearning} className="btn-primary inline-flex items-center gap-1.5 text-xs px-4 py-2">
+              <Play size={13} /> {language === 'hi' ? 'शुरू करें' : 'Start'}
             </button>
           )}
           {outcome.status === 'in_progress' && (
-            <button onClick={handleCompleteModule} className="text-xs px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors">
-              ✅ {language === 'hi' ? 'पूर्ण करें' : 'Mark Complete'}
+            <button onClick={handleCompleteModule} className="inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors">
+              <Check size={14} /> {language === 'hi' ? 'पूर्ण करें' : 'Mark Complete'}
             </button>
           )}
         </div>
@@ -452,7 +464,7 @@ export default function ModuleDetail() {
                   : 'bg-slate-50 dark:bg-surface-dark-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
-              <span>{stage.icon}</span>
+              <stage.Icon size={14} />
               <span>{language === 'hi' ? stage.hi : stage.en}</span>
             </button>
           ))}
@@ -462,7 +474,7 @@ export default function ModuleDetail() {
       {/* Stage Content */}
       <div className="card p-5">
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-          {STAGES[activeStage].icon} {language === 'hi' ? STAGES[activeStage].hi : STAGES[activeStage].en}
+          <ActiveStageIcon size={18} style={{ color: theme.accent }} /> {language === 'hi' ? STAGES[activeStage].hi : STAGES[activeStage].en}
           <span className="text-xs font-normal text-slate-400">
             — {language === 'hi' ? STAGES[activeStage].desc.hi : STAGES[activeStage].desc.en}
           </span>
@@ -472,17 +484,17 @@ export default function ModuleDetail() {
         {activeStage === 0 && (
           <div className="space-y-4">
             <div className="rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 p-8 text-center">
-              <div className="text-6xl mb-4">📺</div>
+              <Video className="w-12 h-12 mx-auto mb-4 text-white/70" strokeWidth={1.6} />
               <p className="text-white/80 text-sm">
                 {language === 'hi' ? 'वीडियो सामग्री — इस विषय पर DGT पाठ्यक्रम के अनुसार विस्तृत वीडियो व्याख्यान' : 'Video content — Detailed video lectures aligned with DGT curriculum on this topic'}
               </p>
               <div className="mt-4 inline-block px-4 py-2 rounded-lg bg-white/10 text-white/60 text-xs">
-                {language === 'hi' ? '🎬 वीडियो जल्द उपलब्ध होंगे' : '🎬 Videos coming soon'}
+                {language === 'hi' ? 'वीडियो जल्द उपलब्ध होंगे' : 'Videos coming soon'}
               </div>
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-              <h3 className="font-semibold text-sm text-blue-800 dark:text-blue-300 mb-2">
-                {language === 'hi' ? '📋 इस मॉड्यूल में शामिल विषय:' : '📋 Topics covered in this module:'}
+              <h3 className="font-semibold text-sm text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                <ListChecks size={15} /> {language === 'hi' ? 'इस मॉड्यूल में शामिल विषय:' : 'Topics covered in this module:'}
               </h3>
               <ul className="space-y-1.5">
                 {content.keyTopics.map((topic, i) => (
@@ -507,7 +519,7 @@ export default function ModuleDetail() {
             {content.formulas.length > 0 && (
               <div className="mt-6">
                 <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  📐 {language === 'hi' ? 'महत्वपूर्ण सूत्र' : 'Key Formulas'}
+                  <Sigma size={15} /> {language === 'hi' ? 'महत्वपूर्ण सूत्र' : 'Key Formulas'}
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {content.formulas.map((f, i) => (
@@ -556,33 +568,33 @@ export default function ModuleDetail() {
                         >
                           <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + oi)}.</span>
                           {language === 'hi' ? opt.hi : opt.en}
-                          {isCorrect && ' ✅'}
-                          {isWrong && ' ❌'}
+                          {isCorrect && <Check size={14} className="inline ml-1" />}
+                          {isWrong && <X size={14} className="inline ml-1" />}
                         </button>
                       );
                     })}
                   </div>
                   {quizSubmitted && (
-                    <div className={`mt-3 p-3 rounded-lg text-xs ${quizAnswers[qi] === q.correct ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'}`}>
-                      💡 {language === 'hi' ? q.explanation.hi : q.explanation.en}
+                    <div className={`mt-3 p-3 rounded-lg text-xs flex items-start gap-1.5 ${quizAnswers[qi] === q.correct ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'}`}>
+                      <Lightbulb size={14} className="mt-0.5 flex-shrink-0" /> {language === 'hi' ? q.explanation.hi : q.explanation.en}
                     </div>
                   )}
                 </div>
               ))
             ) : (
               <div className="text-center py-8 text-slate-400">
-                <p className="text-4xl mb-3">✏️</p>
+                <Dumbbell className="w-10 h-10 mx-auto mb-3 text-slate-300" strokeWidth={1.6} />
                 <p className="text-sm">{language === 'hi' ? 'अभ्यास प्रश्न जल्द जोड़े जाएंगे' : 'Practice questions coming soon'}</p>
               </div>
             )}
             {content.practiceQuestions.length > 0 && !quizSubmitted && (
-              <button onClick={handleQuizSubmit} className="btn-primary text-sm px-6 py-2">
-                {language === 'hi' ? '📝 उत्तर जमा करें' : '📝 Submit Answers'}
+              <button onClick={handleQuizSubmit} className="btn-primary inline-flex items-center gap-1.5 text-sm px-6 py-2">
+                <Send size={14} /> {language === 'hi' ? 'उत्तर जमा करें' : 'Submit Answers'}
               </button>
             )}
             {quizSubmitted && (
-              <button onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); }} className="btn-secondary text-sm px-6 py-2">
-                🔄 {language === 'hi' ? 'पुनः प्रयास' : 'Try Again'}
+              <button onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); }} className="btn-secondary inline-flex items-center gap-1.5 text-sm px-6 py-2">
+                <RotateCcw size={14} /> {language === 'hi' ? 'पुनः प्रयास' : 'Try Again'}
               </button>
             )}
           </div>
@@ -595,19 +607,19 @@ export default function ModuleDetail() {
             <div className="space-y-4">
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 {language === 'hi'
-                  ? '👇 नीचे दिए गए इंटरैक्टिव सिमुलेशन में मान बदलें और परिणाम वास्तविक समय में देखें।'
-                  : '👇 Change the values in the interactive simulation below and watch the results respond in real time.'}
+                  ? 'नीचे दिए गए इंटरैक्टिव सिमुलेशन में मान बदलें और परिणाम वास्तविक समय में देखें।'
+                  : 'Change the values in the interactive simulation below and watch the results respond in real time.'}
               </p>
               {Sim ? <Sim /> : (
                 <div className="text-center py-8 text-slate-400">
-                  <p className="text-4xl mb-3">🔬</p>
+                  <FlaskConical className="w-10 h-10 mx-auto mb-3 text-slate-300" strokeWidth={1.6} />
                   <p className="text-sm">{language === 'hi' ? 'सिमुलेशन जल्द आ रहा है' : 'Simulation coming soon'}</p>
                 </div>
               )}
               <div className="flex flex-wrap gap-2 pt-1">
                 {content.labLink && (
                   <Link to={content.labLink} className="btn-primary text-sm px-5 py-2.5 inline-flex items-center gap-2">
-                    🧪 {language === 'hi' ? 'पूरी लैब खोलें' : 'Open full lab'}
+                    <FlaskConical size={15} /> {language === 'hi' ? 'पूरी लैब खोलें' : 'Open full lab'}
                   </Link>
                 )}
                 <Link to="/labs" className="btn-secondary text-sm px-5 py-2.5 inline-flex items-center gap-2">
@@ -621,12 +633,12 @@ export default function ModuleDetail() {
         {/* Quiz Stage */}
         {activeStage === 4 && (
           <div className="text-center py-8">
-            <p className="text-6xl mb-4">📝</p>
+            <ClipboardCheck className="w-12 h-12 mx-auto mb-4 text-slate-300" strokeWidth={1.6} />
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               {language === 'hi' ? 'मूल्यांकन परीक्षा में अपनी समझ का परीक्षण करें' : 'Test your understanding with the assessment quiz'}
             </p>
             <Link to="/assessments" className="btn-primary text-sm px-6 py-2.5 inline-flex items-center gap-2">
-              📋 {language === 'hi' ? 'मूल्यांकन शुरू करें' : 'Start Assessment'}
+              <FileText size={15} /> {language === 'hi' ? 'मूल्यांकन शुरू करें' : 'Start Assessment'}
             </Link>
           </div>
         )}
@@ -635,7 +647,7 @@ export default function ModuleDetail() {
         {activeStage === 5 && (
           <div className="space-y-4">
             <h3 className="font-semibold text-sm flex items-center gap-2">
-              🌍 {language === 'hi' ? 'वास्तविक दुनिया के अनुप्रयोग' : 'Real-World Applications'}
+              <Globe size={15} /> {language === 'hi' ? 'वास्तविक दुनिया के अनुप्रयोग' : 'Real-World Applications'}
             </h3>
             <div className="grid gap-3 sm:grid-cols-2">
               {content.realWorldApplications.map((app, i) => (
@@ -647,12 +659,12 @@ export default function ModuleDetail() {
               ))}
             </div>
             <h3 className="font-semibold text-sm flex items-center gap-2 mt-6">
-              ⚠️ {language === 'hi' ? 'सुरक्षा सुझाव' : 'Safety Tips'}
+              <AlertTriangle size={15} className="text-amber-500" /> {language === 'hi' ? 'सुरक्षा सुझाव' : 'Safety Tips'}
             </h3>
             <div className="space-y-2">
               {content.safetyTips.map((tip, i) => (
                 <div key={i} className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/15 border border-amber-100 dark:border-amber-800/30">
-                  <span className="text-amber-500 mt-0.5">⚠️</span>
+                  <AlertTriangle size={14} className="text-amber-500 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-amber-800 dark:text-amber-300">{language === 'hi' ? tip.hi : tip.en}</p>
                 </div>
               ))}
@@ -664,7 +676,7 @@ export default function ModuleDetail() {
         {activeStage === 6 && (
           <div className="space-y-4">
             <div className="bg-gradient-to-br from-brand-50 to-indigo-50 dark:from-brand-900/20 dark:to-indigo-900/20 rounded-xl p-5 border border-brand-100 dark:border-brand-800/30">
-              <h3 className="font-bold text-sm mb-3">{language === 'hi' ? '📋 मुख्य बिंदु सारांश' : '📋 Key Points Summary'}</h3>
+              <h3 className="font-bold text-sm mb-3 flex items-center gap-2"><ListChecks size={15} /> {language === 'hi' ? 'मुख्य बिंदु सारांश' : 'Key Points Summary'}</h3>
               <ul className="space-y-2">
                 {content.keyTopics.map((topic, i) => (
                   <li key={i} className="text-sm flex items-start gap-2">
@@ -676,7 +688,7 @@ export default function ModuleDetail() {
             </div>
             {content.formulas.length > 0 && (
               <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800/30">
-                <h3 className="font-bold text-sm mb-2">{language === 'hi' ? '📐 सूत्र पुनरीक्षण' : '📐 Formula Revision'}</h3>
+                <h3 className="font-bold text-sm mb-2 flex items-center gap-2"><Sigma size={15} /> {language === 'hi' ? 'सूत्र पुनरीक्षण' : 'Formula Revision'}</h3>
                 <div className="space-y-1">
                   {content.formulas.map((f, i) => (
                     <p key={i} className="text-sm font-mono">
@@ -688,12 +700,12 @@ export default function ModuleDetail() {
             )}
             {outcome.status !== 'completed' && (
               <button onClick={handleCompleteModule} className="btn-primary text-sm px-6 py-2.5 flex items-center gap-2 mx-auto">
-                ✅ {language === 'hi' ? 'मॉड्यूल पूर्ण करें (+50 XP)' : 'Complete Module (+50 XP)'}
+                <Check size={15} /> {language === 'hi' ? 'मॉड्यूल पूर्ण करें (+50 XP)' : 'Complete Module (+50 XP)'}
               </button>
             )}
             {outcome.status === 'completed' && (
               <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                <p className="text-2xl mb-1">🎉</p>
+                <PartyPopper className="w-7 h-7 mx-auto mb-1 text-green-500" />
                 <p className="text-sm font-medium text-green-700 dark:text-green-300">
                   {language === 'hi' ? 'यह मॉड्यूल पूरा हो चुका है!' : 'This module is completed!'}
                 </p>

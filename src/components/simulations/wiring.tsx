@@ -110,19 +110,31 @@ const SYMBOLS: Sym[] = [
   { id: 'xfmr', en: 'Transformer', hi: 'ट्रांसफॉर्मर', draw: (c, x, y, col) => { c.strokeStyle = col; c.lineWidth = 2.5; c.beginPath(); for (let k = 0; k < 3; k++) c.arc(x - 16, y - 16 + k * 16, 7, -Math.PI / 2, Math.PI / 2, false); for (let k = 0; k < 3; k++) c.arc(x + 16, y - 16 + k * 16, 7, Math.PI / 2, -Math.PI / 2, true); c.stroke(); c.beginPath(); c.moveTo(x, y - 22); c.lineTo(x, y + 22); c.stroke(); } },
 ];
 
-export function SymbolMatchSim() {
+/* Control / panel symbols for the 2nd-year drawing module */
+const CONTROL_SYMBOLS: Sym[] = [
+  { id: 'coil', en: 'Contactor coil', hi: 'कॉन्टैक्टर कॉइल', draw: (c, x, y, col) => { c.strokeStyle = col; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 16, y); c.moveTo(x + 16, y); c.lineTo(x + 36, y); c.strokeRect(x - 16, y - 12, 32, 24); } },
+  { id: 'no', en: 'NO contact', hi: 'NO संपर्क', draw: (c, x, y, col) => { c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 12, y); c.moveTo(x + 12, y); c.lineTo(x + 36, y); c.stroke(); c.beginPath(); c.arc(x - 12, y, 3, 0, Math.PI * 2); c.arc(x + 12, y, 3, 0, Math.PI * 2); c.fill(); c.beginPath(); c.moveTo(x - 12, y); c.lineTo(x + 11, y - 15); c.stroke(); } },
+  { id: 'nc', en: 'NC contact', hi: 'NC संपर्क', draw: (c, x, y, col) => { c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 12, y); c.moveTo(x + 12, y); c.lineTo(x + 36, y); c.stroke(); c.beginPath(); c.arc(x - 12, y, 3, 0, Math.PI * 2); c.arc(x + 12, y, 3, 0, Math.PI * 2); c.fill(); c.beginPath(); c.moveTo(x - 12, y); c.lineTo(x + 12, y - 14); c.moveTo(x + 6, y - 17); c.lineTo(x + 14, y - 5); c.stroke(); } },
+  { id: 'ol', en: 'Overload relay', hi: 'ओवरलोड रिले', draw: (c, x, y, col) => { c.strokeStyle = col; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 18, y); c.moveTo(x + 18, y); c.lineTo(x + 36, y); c.strokeRect(x - 18, y - 11, 36, 22); c.beginPath(); c.moveTo(x - 12, y + 6); c.bezierCurveTo(x - 4, y - 10, x + 4, y + 10, x + 12, y - 6); c.stroke(); } },
+  { id: 'pb', en: 'Push button', hi: 'पुश बटन', draw: (c, x, y, col) => { c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 12, y); c.moveTo(x + 12, y); c.lineTo(x + 36, y); c.stroke(); c.beginPath(); c.arc(x - 12, y, 3, 0, Math.PI * 2); c.arc(x + 12, y, 3, 0, Math.PI * 2); c.fill(); c.beginPath(); c.moveTo(x - 12, y); c.lineTo(x + 11, y - 12); c.moveTo(x, y - 6); c.lineTo(x, y - 20); c.moveTo(x - 8, y - 20); c.lineTo(x + 8, y - 20); c.stroke(); } },
+  { id: 'timer', en: 'Timer contact', hi: 'टाइमर संपर्क', draw: (c, x, y, col) => { c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 12, y); c.moveTo(x + 12, y); c.lineTo(x + 36, y); c.stroke(); c.beginPath(); c.arc(x - 12, y, 3, 0, Math.PI * 2); c.arc(x + 12, y, 3, 0, Math.PI * 2); c.fill(); c.beginPath(); c.moveTo(x - 12, y); c.lineTo(x + 11, y - 15); c.stroke(); c.beginPath(); c.arc(x, y - 7, 9, Math.PI, 0); c.stroke(); } },
+  { id: 'cb', en: 'Circuit breaker', hi: 'सर्किट ब्रेकर', draw: (c, x, y, col) => { c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 12, y); c.moveTo(x + 12, y); c.lineTo(x + 36, y); c.stroke(); c.beginPath(); c.arc(x - 12, y, 3, 0, Math.PI * 2); c.arc(x + 12, y, 3, 0, Math.PI * 2); c.fill(); c.beginPath(); c.moveTo(x - 12, y); c.lineTo(x + 11, y - 15); c.stroke(); c.beginPath(); c.moveTo(x + 3, y - 14); c.lineTo(x + 11, y - 6); c.moveTo(x + 11, y - 14); c.lineTo(x + 3, y - 6); c.stroke(); } },
+  { id: 'pilot', en: 'Indicator lamp', hi: 'संकेतक लैंप', draw: (c, x, y, col) => { c.strokeStyle = col; c.lineWidth = 2.5; c.beginPath(); c.arc(x, y, 13, 0, Math.PI * 2); c.moveTo(x - 9, y - 9); c.lineTo(x + 9, y + 9); c.moveTo(x + 9, y - 9); c.lineTo(x - 9, y + 9); c.moveTo(x - 36, y); c.lineTo(x - 13, y); c.moveTo(x + 13, y); c.lineTo(x + 36, y); c.stroke(); } },
+];
+
+function SymbolGame({ pool, titleEn, titleHi, subEn, subHi }: { pool: Sym[]; titleEn: string; titleHi: string; subEn: string; subHi: string }) {
   const L = useLang();
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [asked, setAsked] = useState(0);
 
-  const order = useMemo(() => [...SYMBOLS].sort(() => Math.random() - 0.5), []);
+  const order = useMemo(() => [...pool].sort(() => Math.random() - 0.5), [pool]);
   const current = order[idx % order.length];
   const options = useMemo(() => {
-    const wrong = SYMBOLS.filter((s) => s.id !== current.id).sort(() => Math.random() - 0.5).slice(0, 3);
+    const wrong = pool.filter((s) => s.id !== current.id).sort(() => Math.random() - 0.5).slice(0, 3);
     return [...wrong, current].sort(() => Math.random() - 0.5);
-  }, [current]);
+  }, [current, pool]);
 
   const choose = (id: string) => {
     if (picked) return;
@@ -135,9 +147,8 @@ export function SymbolMatchSim() {
   return (
     <SimShell
       accent={THEMES.drawing.accent} Icon={THEMES.drawing.Icon}
-      title={L('Electrical Symbol Match', 'विद्युत प्रतीक मिलान')}
-      subtitle={L('Identify the schematic symbol — the language of wiring diagrams. Build speed before your drawing exam.',
-        'योजनाबद्ध प्रतीक पहचानें — वायरिंग आरेख की भाषा। ड्राइंग परीक्षा से पहले गति बनाएं।')}
+      title={L(titleEn, titleHi)}
+      subtitle={L(subEn, subHi)}
       controls={<div className="grid grid-cols-2 gap-2">
         {options.map((o) => {
           const state = picked ? (o.id === current.id ? 'correct' : (o.id === picked ? 'wrong' : 'idle')) : 'idle';
@@ -167,4 +178,18 @@ export function SymbolMatchSim() {
       </div>
     </SimShell>
   );
+}
+
+export function SymbolMatchSim() {
+  return <SymbolGame pool={SYMBOLS}
+    titleEn="Electrical Symbol Match" titleHi="विद्युत प्रतीक मिलान"
+    subEn="Identify the schematic symbol — the language of wiring diagrams. Build speed before your drawing exam."
+    subHi="योजनाबद्ध प्रतीक पहचानें — वायरिंग आरेख की भाषा। ड्राइंग परीक्षा से पहले गति बनाएं।" />;
+}
+
+export function ControlSymbolMatchSim() {
+  return <SymbolGame pool={CONTROL_SYMBOLS}
+    titleEn="Control & Panel Symbol Match" titleHi="कंट्रोल व पैनल प्रतीक मिलान"
+    subEn="Second-year drawing: identify contactor, relay, timer and protection symbols used in control circuit diagrams."
+    subHi="द्वितीय-वर्ष ड्राइंग: कंट्रोल सर्किट आरेख में प्रयुक्त कॉन्टैक्टर, रिले, टाइमर व सुरक्षा प्रतीक पहचानें।" />;
 }
