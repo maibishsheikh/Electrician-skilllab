@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/context/store';
+import { getModuleSimulation } from '@/components/simulations';
 
 // Detailed content for each module's 7-stage learning journey
 const moduleContent: Record<number, {
@@ -584,24 +585,35 @@ export default function ModuleDetail() {
           </div>
         )}
 
-        {/* Simulate Stage */}
-        {activeStage === 3 && (
-          <div className="text-center py-8">
-            <p className="text-6xl mb-4">🔬</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-              {language === 'hi' ? 'वर्चुअल लैब में प्रयोग करके सीखें' : 'Learn by experimenting in the virtual lab'}
-            </p>
-            {content.labLink ? (
-              <Link to={content.labLink} className="btn-primary text-sm px-6 py-2.5 inline-flex items-center gap-2">
-                🧪 {language === 'hi' ? 'लैब में जाएं' : 'Go to Lab'}
-              </Link>
-            ) : (
-              <Link to="/labs" className="btn-primary text-sm px-6 py-2.5 inline-flex items-center gap-2">
-                🧪 {language === 'hi' ? 'सभी लैब देखें' : 'View All Labs'}
-              </Link>
-            )}
-          </div>
-        )}
+        {/* Simulate Stage — embedded interactive simulation */}
+        {activeStage === 3 && (() => {
+          const Sim = getModuleSimulation(outcomeId);
+          return (
+            <div className="space-y-4">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {language === 'hi'
+                  ? '👇 नीचे दिए गए इंटरैक्टिव सिमुलेशन में मान बदलें और परिणाम वास्तविक समय में देखें।'
+                  : '👇 Change the values in the interactive simulation below and watch the results respond in real time.'}
+              </p>
+              {Sim ? <Sim /> : (
+                <div className="text-center py-8 text-slate-400">
+                  <p className="text-4xl mb-3">🔬</p>
+                  <p className="text-sm">{language === 'hi' ? 'सिमुलेशन जल्द आ रहा है' : 'Simulation coming soon'}</p>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {content.labLink && (
+                  <Link to={content.labLink} className="btn-primary text-sm px-5 py-2.5 inline-flex items-center gap-2">
+                    🧪 {language === 'hi' ? 'पूरी लैब खोलें' : 'Open full lab'}
+                  </Link>
+                )}
+                <Link to="/labs" className="btn-secondary text-sm px-5 py-2.5 inline-flex items-center gap-2">
+                  {language === 'hi' ? 'सभी लैब देखें' : 'View all labs'}
+                </Link>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Quiz Stage */}
         {activeStage === 4 && (
