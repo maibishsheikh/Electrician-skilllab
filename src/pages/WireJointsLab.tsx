@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { useAppStore } from '@/context/store';
+import {
+  Cable, Minus, Split, Link2, FlaskConical, ClipboardList, Target, BarChart3,
+  ListChecks, Check, Search, Plug, ShieldCheck, Circle, Globe, Palette,
+  PartyPopper, GraduationCap, RotateCcw, X, type LucideIcon,
+} from 'lucide-react';
+import { THEMES, withAlpha } from '@/components/simulations/theme';
 
 type JointType = 'straight' | 'tee' | 'western' | 'married';
+const TH = THEMES.cable;
+const JOINT_ICONS: Record<JointType, LucideIcon> = { straight: Minus, tee: Split, western: Link2, married: Cable };
 
 interface JointStep {
   en: string;
@@ -203,30 +211,25 @@ export default function WireJointsLab() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold">🔗 {language === 'hi' ? 'वायर जोड़ एवं केबल परीक्षण' : 'Wire Joints & Cable Testing'}</h1>
-        <p className="text-xs text-slate-500 mt-1">
-          {language === 'hi' ? 'विभिन्न प्रकार के तार जोड़ बनाना और केबल परीक्षण सीखें' : 'Learn to make different wire joints and test cables'}
-        </p>
+      <div className="flex items-center gap-3">
+        <span className="grid place-items-center w-11 h-11 rounded-2xl flex-shrink-0" style={{ background: withAlpha(TH.accent, 0.15), color: TH.accent }}><Cable size={22} strokeWidth={2.2} /></span>
+        <div>
+          <h1 className="text-xl font-bold">{language === 'hi' ? 'वायर जोड़ एवं केबल परीक्षण' : 'Wire Joints & Cable Testing'}</h1>
+          <p className="text-xs text-slate-500">{language === 'hi' ? 'विभिन्न तार जोड़ बनाना व केबल परीक्षण सीखें' : 'Make different wire joints and test cables'}</p>
+        </div>
       </div>
 
       {/* Tab Navigation */}
       <div className="flex gap-2 p-1 bg-slate-100 dark:bg-surface-dark-2 rounded-xl">
-        {[
-          { key: 'joints' as const, icon: '🔗', en: 'Wire Joints', hi: 'तार जोड़' },
-          { key: 'testing' as const, icon: '🔬', en: 'Cable Testing', hi: 'केबल परीक्षण' },
-          { key: 'quiz' as const, icon: '📝', en: 'Quiz', hi: 'क्विज़' },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 text-xs font-medium py-2.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === tab.key
-                ? 'bg-white dark:bg-surface-dark shadow-md text-brand-600 dark:text-brand-400'
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-            }`}
-          >
-            {tab.icon} {language === 'hi' ? tab.hi : tab.en}
+        {([
+          { key: 'joints' as const, Icon: Link2, en: 'Wire Joints', hi: 'तार जोड़' },
+          { key: 'testing' as const, Icon: FlaskConical, en: 'Cable Testing', hi: 'केबल परीक्षण' },
+          { key: 'quiz' as const, Icon: ClipboardList, en: 'Quiz', hi: 'क्विज़' },
+        ]).map((tab) => (
+          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+            className={`flex-1 text-xs font-medium py-2.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === tab.key ? 'bg-white dark:bg-surface-dark shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            style={activeTab === tab.key ? { color: TH.accent } : undefined}>
+            <tab.Icon size={14} /> {language === 'hi' ? tab.hi : tab.en}
           </button>
         ))}
       </div>
@@ -239,31 +242,24 @@ export default function WireJointsLab() {
             {(Object.keys(JOINT_DATA) as JointType[]).map((type) => {
               const j = JOINT_DATA[type];
               const progress = getJointProgress(type);
+              const JIcon = JOINT_ICONS[type];
               return (
-                <button
-                  key={type}
-                  onClick={() => { setSelectedJoint(type); setCurrentStep(0); }}
-                  className={`w-full text-left p-3 rounded-xl transition-all ${
-                    selectedJoint === type
-                      ? 'bg-brand-50 dark:bg-brand-900/20 border-2 border-brand-500 shadow-md'
-                      : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 hover:border-brand-300'
-                  }`}
-                >
+                <button key={type} onClick={() => { setSelectedJoint(type); setCurrentStep(0); }}
+                  className={`w-full text-left p-3 rounded-xl transition-all border-2 ${selectedJoint === type ? 'shadow-sm' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'}`}
+                  style={selectedJoint === type ? { borderColor: TH.accent, background: withAlpha(TH.accent, 0.08) } : undefined}>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xl">{j.icon}</span>
+                    <span className="grid place-items-center w-7 h-7 rounded-lg flex-shrink-0" style={{ background: withAlpha(TH.accent, 0.12), color: TH.accent }}><JIcon size={15} /></span>
                     <span className="font-medium text-sm">{language === 'hi' ? j.name.hi : j.name.en}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-brand-500 rounded-full transition-all duration-500"
-                        style={{ width: `${progress}%` }}
-                      />
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: TH.accent }} />
                     </div>
                     <span className="text-[10px] text-slate-400">{progress}%</span>
                   </div>
-                  <div className="flex gap-3 mt-2 text-[10px] text-slate-400">
-                    <span>💪 {language === 'hi' ? 'शक्ति' : 'Strength'}: {'⬛'.repeat(j.strength)}{'⬜'.repeat(5 - j.strength)}</span>
+                  <div className="flex items-center gap-1.5 mt-2 text-[10px] text-slate-400">
+                    <span>{language === 'hi' ? 'शक्ति' : 'Strength'}</span>
+                    <span className="flex gap-0.5">{Array.from({ length: 5 }, (_, k) => <span key={k} className="w-2 h-2 rounded-sm" style={{ background: k < j.strength ? TH.accent : withAlpha(TH.accent, 0.2) }} />)}</span>
                   </div>
                 </button>
               );
@@ -276,7 +272,7 @@ export default function WireJointsLab() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h2 className="text-lg font-bold flex items-center gap-2">
-                    {joint.icon} {language === 'hi' ? joint.name.hi : joint.name.en}
+                    {(() => { const JI = JOINT_ICONS[selectedJoint]; return <JI size={18} style={{ color: TH.accent }} />; })()} {language === 'hi' ? joint.name.hi : joint.name.en}
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">
                     {language === 'hi' ? joint.description.hi : joint.description.en}
@@ -285,17 +281,17 @@ export default function WireJointsLab() {
               </div>
 
               <div className="flex gap-4 mb-4 text-xs">
-                <div className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
-                  🎯 {language === 'hi' ? joint.use.hi : joint.use.en}
+                <div className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 inline-flex items-center gap-1.5">
+                  <Target size={13} /> {language === 'hi' ? joint.use.hi : joint.use.en}
                 </div>
-                <div className="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">
-                  📊 {language === 'hi' ? `कठिनाई: ${joint.difficulty}/5` : `Difficulty: ${joint.difficulty}/5`}
+                <div className="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 inline-flex items-center gap-1.5">
+                  <BarChart3 size={13} /> {language === 'hi' ? `कठिनाई: ${joint.difficulty}/5` : `Difficulty: ${joint.difficulty}/5`}
                 </div>
               </div>
 
               {/* Step-by-step guide */}
-              <h3 className="font-semibold text-sm mb-3">
-                📋 {language === 'hi' ? 'चरण-दर-चरण प्रक्रिया' : 'Step-by-Step Procedure'}
+              <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                <ListChecks size={15} style={{ color: TH.accent }} /> {language === 'hi' ? 'चरण-दर-चरण प्रक्रिया' : 'Step-by-Step Procedure'}
               </h3>
               <div className="space-y-2">
                 {joint.steps.map((step, i) => {
@@ -320,7 +316,7 @@ export default function WireJointsLab() {
                           ? 'bg-brand-500 text-white'
                           : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
                       }`}>
-                        {isComplete ? '✓' : i + 1}
+                        {isComplete ? <Check size={14} /> : i + 1}
                       </div>
                       <div className="flex-1">
                         <p className="text-sm">{language === 'hi' ? step.hi : step.en}</p>
@@ -332,9 +328,10 @@ export default function WireJointsLab() {
                             markStepComplete(selectedJoint, i);
                             if (i < joint.steps.length - 1) setCurrentStep(i + 1);
                           }}
-                          className="text-[10px] px-3 py-1 rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition-colors flex-shrink-0"
+                          className="inline-flex items-center gap-1 text-[10px] px-3 py-1 rounded-lg text-white transition-colors flex-shrink-0"
+                          style={{ background: TH.accent }}
                         >
-                          ✅ {language === 'hi' ? 'पूर्ण' : 'Done'}
+                          <Check size={12} /> {language === 'hi' ? 'पूर्ण' : 'Done'}
                         </button>
                       )}
                     </div>
@@ -345,7 +342,7 @@ export default function WireJointsLab() {
 
             {/* Test Criteria */}
             <div className="card p-4 border-l-4 border-l-amber-500">
-              <h3 className="font-semibold text-sm mb-2">🔍 {language === 'hi' ? 'गुणवत्ता जांच मानदंड' : 'Quality Check Criteria'}</h3>
+              <h3 className="font-semibold text-sm mb-2 flex items-center gap-2"><Search size={15} className="text-amber-500" /> {language === 'hi' ? 'गुणवत्ता जांच मानदंड' : 'Quality Check Criteria'}</h3>
               <div className="space-y-1.5">
                 {joint.testCriteria.map((c, i) => (
                   <p key={i} className="text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2">
@@ -363,13 +360,13 @@ export default function WireJointsLab() {
       {activeTab === 'testing' && (
         <div className="space-y-4">
           <div className="card p-5">
-            <h2 className="text-lg font-bold mb-4">🔬 {language === 'hi' ? 'केबल परीक्षण विधियां' : 'Cable Testing Methods'}</h2>
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><FlaskConical size={20} style={{ color: TH.accent }} /> {language === 'hi' ? 'केबल परीक्षण विधियां' : 'Cable Testing Methods'}</h2>
 
             <div className="grid sm:grid-cols-2 gap-4">
               {/* Continuity Test */}
               <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🔌</span>
+                  <Plug size={18} style={{ color: TH.accent }} />
                   <h3 className="font-semibold text-sm">{language === 'hi' ? 'कंटिन्युइटी टेस्ट' : 'Continuity Test'}</h3>
                 </div>
                 <p className="text-xs text-slate-500 mb-3">
@@ -394,7 +391,7 @@ export default function WireJointsLab() {
               {/* Insulation Resistance Test */}
               <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">📏</span>
+                  <ShieldCheck size={18} style={{ color: TH.accent }} />
                   <h3 className="font-semibold text-sm">{language === 'hi' ? 'इन्सुलेशन प्रतिरोध परीक्षण' : 'Insulation Resistance Test'}</h3>
                 </div>
                 <p className="text-xs text-slate-500 mb-3">
@@ -419,7 +416,7 @@ export default function WireJointsLab() {
               {/* Polarity Test */}
               <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🔴🔵</span>
+                  <span className="flex gap-0.5"><Circle size={14} fill="#ef4444" stroke="none" /><Circle size={14} fill="#3b82f6" stroke="none" /></span>
                   <h3 className="font-semibold text-sm">{language === 'hi' ? 'पोलैरिटी टेस्ट' : 'Polarity Test'}</h3>
                 </div>
                 <p className="text-xs text-slate-500 mb-3">
@@ -436,7 +433,7 @@ export default function WireJointsLab() {
               {/* Earth Loop Impedance */}
               <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🌍</span>
+                  <Globe size={18} style={{ color: TH.accent }} />
                   <h3 className="font-semibold text-sm">{language === 'hi' ? 'अर्थ लूप इम्पीडेंस' : 'Earth Loop Impedance'}</h3>
                 </div>
                 <p className="text-xs text-slate-500 mb-3">
@@ -454,7 +451,7 @@ export default function WireJointsLab() {
 
           {/* Wire Color Code Reference */}
           <div className="card p-4">
-            <h3 className="font-semibold text-sm mb-3">🎨 {language === 'hi' ? 'भारतीय मानक तार रंग कोड' : 'Indian Standard Wire Color Code'}</h3>
+            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2"><Palette size={15} style={{ color: TH.accent }} /> {language === 'hi' ? 'भारतीय मानक तार रंग कोड' : 'Indian Standard Wire Color Code'}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { color: 'bg-red-500', wire: { en: 'Phase (L1)', hi: 'फेज (L1)' }, code: 'Red / लाल' },
@@ -481,7 +478,7 @@ export default function WireJointsLab() {
       {/* Quiz Tab */}
       {activeTab === 'quiz' && (
         <div className="card p-5 space-y-4">
-          <h2 className="text-lg font-bold">📝 {language === 'hi' ? 'क्विज़: तार जोड़ एवं केबल' : 'Quiz: Wire Joints & Cables'}</h2>
+          <h2 className="text-lg font-bold flex items-center gap-2"><ClipboardList size={20} style={{ color: TH.accent }} /> {language === 'hi' ? 'क्विज़: तार जोड़ एवं केबल' : 'Quiz: Wire Joints & Cables'}</h2>
           {CABLE_QUIZ.map((q, qi) => (
             <div key={qi} className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
               <p className="font-medium text-sm mb-3">{qi + 1}. {language === 'hi' ? q.q.hi : q.q.en}</p>
@@ -495,15 +492,15 @@ export default function WireJointsLab() {
                       key={oi}
                       onClick={() => !quizSubmitted && setQuizAnswers({ ...quizAnswers, [qi]: oi })}
                       disabled={quizSubmitted}
-                      className={`text-left text-sm px-4 py-2 rounded-lg border transition-all ${
+                      className={`text-left text-sm px-4 py-2 rounded-lg border transition-all flex items-center ${
                         isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                         : isWrong ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                         : isSelected ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       }`}
                     >
-                      {String.fromCharCode(65 + oi)}. {language === 'hi' ? opt.hi : opt.en}
-                      {isCorrect && ' ✅'}{isWrong && ' ❌'}
+                      <span className="font-mono text-xs mr-2 opacity-50">{String.fromCharCode(65 + oi)}.</span>{language === 'hi' ? opt.hi : opt.en}
+                      {isCorrect && <Check size={15} className="ml-auto text-green-600" />}{isWrong && <X size={15} className="ml-auto text-red-600" />}
                     </button>
                   );
                 })}
@@ -511,15 +508,15 @@ export default function WireJointsLab() {
             </div>
           ))}
           {!quizSubmitted ? (
-            <button onClick={() => { setQuizSubmitted(true); if (quizScore >= 3) addXP(20); }} className="btn-primary text-sm px-6 py-2">
-              📝 {language === 'hi' ? 'जमा करें' : 'Submit'}
+            <button onClick={() => { setQuizSubmitted(true); if (quizScore >= 3) addXP(20); }} className="btn-primary inline-flex items-center gap-1.5 text-sm px-6 py-2">
+              <Check size={15} /> {language === 'hi' ? 'जमा करें' : 'Submit'}
             </button>
           ) : (
             <div className={`p-4 rounded-xl text-center ${quizScore >= 3 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
-              <p className="text-2xl mb-1">{quizScore >= 3 ? '🎉' : '📚'}</p>
+              {quizScore >= 3 ? <PartyPopper className="w-7 h-7 mx-auto mb-1 text-green-500" /> : <GraduationCap className="w-7 h-7 mx-auto mb-1 text-amber-500" />}
               <p className="font-bold">{quizScore}/{CABLE_QUIZ.length} {language === 'hi' ? 'सही' : 'Correct'}</p>
-              <button onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); }} className="btn-secondary text-xs px-4 py-1.5 mt-2">
-                🔄 {language === 'hi' ? 'पुनः प्रयास' : 'Retry'}
+              <button onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); }} className="btn-secondary inline-flex items-center gap-1.5 text-xs px-4 py-1.5 mt-2">
+                <RotateCcw size={13} /> {language === 'hi' ? 'पुनः प्रयास' : 'Retry'}
               </button>
             </div>
           )}

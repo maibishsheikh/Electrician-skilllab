@@ -51,6 +51,71 @@ const SPOTS: Spot[] = [
 ];
 const TOTAL_HAZARDS = SPOTS.filter((s) => s.hazard).length;
 
+// Marker positions over the illustrated scene (800×480 viewBox)
+const POS: Record<string, { x: number; y: number }> = {
+  live: { x: 96, y: 150 }, cable: { x: 430, y: 150 }, octopus: { x: 648, y: 392 },
+  water: { x: 612, y: 452 }, bare: { x: 300, y: 262 }, noearth: { x: 178, y: 372 },
+  ladder: { x: 712, y: 180 }, ppe: { x: 452, y: 330 }, extin: { x: 126, y: 214 }, jbox: { x: 540, y: 116 },
+};
+
+function HazardScene() {
+  return (
+    <>
+      <defs>
+        <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#dfe7f0" /><stop offset="1" stopColor="#cdd8e6" /></linearGradient>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#b9a888" /><stop offset="1" stopColor="#a2906f" /></linearGradient>
+        <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#cbd5e1" /><stop offset="0.5" stopColor="#f1f5f9" /><stop offset="1" stopColor="#94a3b8" /></linearGradient>
+      </defs>
+      {/* room */}
+      <rect x="0" y="0" width="800" height="318" fill="url(#wall)" />
+      <rect x="0" y="318" width="800" height="162" fill="url(#floor)" />
+      <rect x="0" y="312" width="800" height="8" fill="#8a7a5c" />
+      {/* window */}
+      <rect x="250" y="40" width="120" height="80" rx="4" fill="#afd3ef" stroke="#8aa0b4" strokeWidth="3" />
+      <line x1="310" y1="40" x2="310" y2="120" stroke="#8aa0b4" strokeWidth="2" /><line x1="250" y1="80" x2="370" y2="80" stroke="#8aa0b4" strokeWidth="2" />
+      {/* ceiling light */}
+      <line x1="410" y1="0" x2="410" y2="24" stroke="#64748b" strokeWidth="2" /><ellipse cx="410" cy="30" rx="18" ry="7" fill="#fde68a" stroke="#eab308" />
+      {/* ceiling supply wire + metal ladder (hazard) */}
+      <line x1="620" y1="0" x2="760" y2="60" stroke="#475569" strokeWidth="2.5" />
+      <g stroke="#9ca3af" strokeWidth="4"><line x1="700" y1="90" x2="690" y2="300" /><line x1="726" y1="90" x2="736" y2="300" />
+        {[110, 150, 190, 230, 270].map((y, i) => <line key={i} x1={698 - i} y1={y} x2={728 + i} y2={y} />)}</g>
+      {/* open distribution board (hazard: live panel) */}
+      <rect x="52" y="72" width="88" height="130" rx="4" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="2" />
+      <rect x="140" y="72" width="40" height="130" rx="3" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="2" transform="skewY(-8)" opacity="0.9" />
+      <rect x="64" y="96" width="64" height="12" rx="2" fill="#475569" />
+      {[0, 1, 2, 3].map((i) => <rect key={i} x={68 + i * 15} y="90" width="10" height="20" rx="1" fill="#f8fafc" stroke="#64748b" />)}
+      {/* exposed live wires from panel */}
+      <path d="M70 200 q-6 24 6 40" fill="none" stroke="#dc2626" strokeWidth="3" />
+      <path d="M86 200 q10 20 -2 44" fill="none" stroke="#1e293b" strokeWidth="3" />
+      <path d="M102 200 q8 26 18 36" fill="none" stroke="#2563eb" strokeWidth="3" />
+      {/* fire extinguisher (safe) */}
+      <rect x="116" y="190" width="22" height="46" rx="8" fill="#dc2626" stroke="#991b1b" strokeWidth="1.5" /><rect x="123" y="180" width="8" height="12" fill="#334155" /><line x1="127" y1="180" x2="150" y2="196" stroke="#334155" strokeWidth="2" />
+      {/* junction box (safe, closed) */}
+      <rect x="516" y="96" width="48" height="40" rx="4" fill="#cbd5e1" stroke="#64748b" strokeWidth="2" /><circle cx="524" cy="104" r="2" fill="#64748b" /><circle cx="556" cy="104" r="2" fill="#64748b" /><circle cx="524" cy="128" r="2" fill="#64748b" /><circle cx="556" cy="128" r="2" fill="#64748b" />
+      {/* frayed cable from ceiling (hazard) */}
+      <path d="M430 24 q-10 70 2 110" fill="none" stroke="#1e293b" strokeWidth="5" />
+      <g stroke="#f59e0b" strokeWidth="2" fill="none"><path d="M432 134 l-8 16" /><path d="M432 134 l2 20" /><path d="M432 134 l10 14" /></g>
+      {/* wall socket + bare wire (hazard) */}
+      <rect x="286" y="232" width="28" height="22" rx="3" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="1.5" /><circle cx="296" cy="243" r="2" fill="#64748b" /><circle cx="304" cy="243" r="2" fill="#64748b" />
+      <path d="M300 254 q-14 20 -2 44" fill="none" stroke="#1e293b" strokeWidth="3" /><line x1="298" y1="296" x2="294" y2="306" stroke="#f59e0b" strokeWidth="2" /><line x1="298" y1="296" x2="303" y2="305" stroke="#f59e0b" strokeWidth="2" />
+      {/* appliance with 2-pin plug (hazard: no earth) */}
+      <rect x="150" y="344" width="56" height="40" rx="4" fill="#64748b" /><rect x="158" y="352" width="40" height="18" rx="2" fill="#94a3b8" />
+      <line x1="178" y1="384" x2="178" y2="332" stroke="#334155" strokeWidth="2" /><rect x="170" y="326" width="16" height="10" rx="2" fill="#1e293b" />
+      {/* workbench + bare hands on tool (hazard: no PPE) */}
+      <rect x="372" y="322" width="150" height="16" rx="2" fill="#9a7b53" /><rect x="380" y="338" width="6" height="40" fill="#7c5f3d" /><rect x="508" y="338" width="6" height="40" fill="#7c5f3d" />
+      <rect x="430" y="308" width="44" height="14" rx="2" fill="#334155" /><line x1="452" y1="308" x2="452" y2="300" stroke="#dc2626" strokeWidth="2" />
+      <circle cx="438" cy="318" r="7" fill="#f3c19b" /><circle cx="466" cy="318" r="7" fill="#f3c19b" />
+      {/* overloaded power strip + tangled plugs (hazard) */}
+      <rect x="600" y="384" width="96" height="18" rx="4" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
+      {[0, 1, 2, 3, 4].map((i) => <rect key={i} x={606 + i * 17} y="372" width="13" height="14" rx="2" fill={['#dc2626', '#1e293b', '#2563eb', '#16a34a', '#eab308'][i]} />)}
+      <path d="M612 386 q-30 10 -40 40 M629 386 q40 20 60 10 M663 386 q-20 30 -60 40" fill="none" stroke="#334155" strokeWidth="2" opacity="0.7" />
+      {/* water puddle (hazard) */}
+      <ellipse cx="612" cy="452" rx="70" ry="16" fill="#60a5fa" opacity="0.55" /><ellipse cx="612" cy="452" rx="44" ry="9" fill="#3b82f6" opacity="0.4" />
+      <rect x="628" y="402" width="8" height="16" fill="url(#metal)" />
+    </>
+  );
+}
+
 function HazardHunt() {
   const L = useLang();
   const [found, setFound] = useState<Set<string>>(new Set());
@@ -68,80 +133,56 @@ function HazardHunt() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-slate-600 dark:text-slate-300">
-          {L('Tap every hazard in the workshop', 'कार्यशाला में हर खतरा टैप करें')}
-        </span>
-        <span className="font-mono font-bold" style={{ color: T.accent }}>
-          {found.size}/{TOTAL_HAZARDS} {L('found', 'मिले')}
-        </span>
+        <span className="font-medium text-slate-600 dark:text-slate-300">{L('Inspect the workshop and tap each electrical hazard', 'कार्यशाला का निरीक्षण करें और हर विद्युत खतरा टैप करें')}</span>
+        <span className="font-mono font-bold" style={{ color: T.accent }}>{found.size}/{TOTAL_HAZARDS}</span>
+      </div>
+      <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+        <div className="h-full rounded-full transition-all" style={{ width: `${(found.size / TOTAL_HAZARDS) * 100}%`, background: T.accent }} />
       </div>
 
-      {/* Scene */}
-      <div className="relative w-full rounded-xl overflow-hidden select-none" style={{ aspectRatio: '16/10', minHeight: 220 }}>
-        {/* wall + floor */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(#e8eef5 0%, #dde6f0 58%, #c3b39a 58%, #b6a488 100%)' }} />
-        <div className="absolute inset-0 dark:block hidden" style={{ background: 'linear-gradient(#1e293b 0%, #16202e 58%, #3a2f22 58%, #2a2217 100%)' }} />
-        {/* overhead line */}
-        <div className="absolute left-0 right-0" style={{ top: '13%', height: 3, background: '#64748b' }} />
-        {/* distribution board */}
-        <div className="absolute rounded-md border-2" style={{ left: '6%', top: '24%', width: '14%', height: '20%', background: '#cbd5e1', borderColor: '#94a3b8' }} />
-        {/* workbench */}
-        <div className="absolute rounded-sm" style={{ left: '40%', top: '62%', width: '34%', height: '8%', background: '#9a7b53' }} />
-        <div className="absolute" style={{ left: '42%', top: '70%', width: 5, height: '18%', background: '#7c5f3d' }} />
-        <div className="absolute" style={{ left: '70%', top: '70%', width: 5, height: '18%', background: '#7c5f3d' }} />
-        {/* puddle */}
-        <div className="absolute rounded-[50%]" style={{ left: '26%', top: '90%', width: '16%', height: '6%', background: 'rgba(56,189,248,0.55)' }} />
-
-        {/* hotspots */}
-        {SPOTS.map((s) => {
-          const isFound = found.has(s.id);
-          const isActive = active?.id === s.id;
-          const state = isFound ? 'found' : (!s.hazard && isActive) ? 'safe' : 'idle';
-          const col = state === 'found' ? '#16a34a' : state === 'safe' ? '#0891b2' : T.accent;
-          return (
-            <button
-              key={s.id}
-              onClick={() => click(s)}
-              className="absolute grid place-items-center rounded-full border-2 transition-transform active:scale-90"
-              style={{
-                left: `${s.x}%`, top: `${s.y}%`, width: 34, height: 34, transform: 'translate(-50%,-50%)',
-                background: '#fff', borderColor: col, color: col,
-                boxShadow: state === 'idle' ? `0 0 0 0 ${col}` : `0 0 0 3px ${col}33`,
-                animation: state === 'idle' ? 'simPulse 2s infinite' : 'none',
-              }}
-              aria-label={L(s.nameEn, s.nameHi)}
-            >
-              <s.Icon size={17} strokeWidth={2.2} />
-            </button>
-          );
-        })}
-        <style>{`@keyframes simPulse{0%{box-shadow:0 0 0 0 ${T.accent}55}70%{box-shadow:0 0 0 10px ${T.accent}00}100%{box-shadow:0 0 0 0 ${T.accent}00}}`}</style>
+      <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+        <svg viewBox="0 0 800 480" className="w-full block select-none" style={{ touchAction: 'manipulation' }}>
+          <HazardScene />
+          {SPOTS.map((s) => {
+            const pos = POS[s.id]; if (!pos) return null;
+            const isFound = found.has(s.id);
+            const isSafe = !s.hazard && active?.id === s.id;
+            const col = isFound ? '#16a34a' : isSafe ? '#0891b2' : '#dc2626';
+            return (
+              <g key={s.id} onClick={() => click(s)} style={{ cursor: 'pointer' }}>
+                {!isFound && !isSafe && (
+                  <circle cx={pos.x} cy={pos.y} r="20" fill="none" stroke={col} strokeWidth="2" opacity="0.8">
+                    <animate attributeName="r" values="16;24;16" dur="1.8s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.8;0.1;0.8" dur="1.8s" repeatCount="indefinite" />
+                  </circle>
+                )}
+                <circle cx={pos.x} cy={pos.y} r="15" fill={isFound || isSafe ? col : '#ffffff'} fillOpacity={isFound || isSafe ? 0.9 : 0.35} stroke={col} strokeWidth="2.5" />
+                {(isFound || isSafe) && <path d={`M${pos.x - 6} ${pos.y} l4 4 l8 -8`} fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+              </g>
+            );
+          })}
+        </svg>
       </div>
 
-      {/* info / feedback panel */}
       {active ? (
-        <div className="rounded-xl border p-3" style={{ borderColor: active.hazard ? '#dc262644' : '#0891b244', background: active.hazard ? '#fef2f2' : '#ecfeff' }}>
+        <div className="rounded-xl border p-3" style={{ borderColor: active.hazard ? '#dc262644' : '#0891b244', background: active.hazard ? 'rgba(254,242,242,0.9)' : 'rgba(236,254,255,0.9)' }}>
           <div className="flex items-center gap-2 mb-1">
             {active.hazard ? <TriangleAlert size={16} className="text-red-600" /> : <CheckCircle2 size={16} className="text-cyan-600" />}
             <span className="font-bold text-sm" style={{ color: active.hazard ? '#b91c1c' : '#0e7490' }}>{L(active.nameEn, active.nameHi)}</span>
           </div>
-          <p className="text-xs text-slate-700 dark:text-slate-700">{L(active.whyEn, active.whyHi)}</p>
+          <p className="text-xs text-slate-700">{L(active.whyEn, active.whyHi)}</p>
           <p className="text-xs mt-1 font-medium" style={{ color: active.hazard ? '#b91c1c' : '#0e7490' }}>→ {L(active.fixEn, active.fixHi)}</p>
         </div>
       ) : (
-        <p className="text-xs text-slate-400 text-center py-2">{L('Tap a glowing marker to inspect it.', 'जांचने हेतु चमकता मार्कर टैप करें।')}</p>
+        <p className="text-xs text-slate-400 text-center py-2">{L('Tap a pulsing circle to inspect that part of the workshop.', 'कार्यशाला के उस भाग की जांच हेतु स्पंदित वृत्त टैप करें।')}</p>
       )}
 
       {done && (
         <div className="rounded-xl p-3 text-sm font-medium flex items-center gap-2" style={{ background: '#16a34a1a', color: '#15803d' }}>
-          <CheckCircle2 size={18} />
-          {L(`All ${TOTAL_HAZARDS} hazards identified with ${misses} false alarms. A real electrician scans like this before every job.`,
-            `सभी ${TOTAL_HAZARDS} खतरे पहचाने, ${misses} गलत अलार्म। असली इलेक्ट्रीशियन हर काम से पहले ऐसे ही जांचता है।`)}
+          <CheckCircle2 size={18} />{L(`All ${TOTAL_HAZARDS} hazards identified (${misses} false alarms). This pre-work inspection is standard practice before any electrical job.`, `सभी ${TOTAL_HAZARDS} खतरे पहचाने (${misses} गलत)। किसी भी विद्युत कार्य से पहले यह निरीक्षण मानक प्रथा है।`)}
         </div>
       )}
-      <button onClick={reset} className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700">
-        <RotateCcw size={13} /> {L('Reset scene', 'सीन रीसेट करें')}
-      </button>
+      <button onClick={reset} className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700"><RotateCcw size={13} /> {L('Reset inspection', 'निरीक्षण रीसेट करें')}</button>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import {
   SimCanvas, SimShell, Slider, Segmented, Readout, Toggle, useLang, palette, drawGrid, roundRect,
 } from './primitives';
 import { THEMES } from './theme';
+import { ProLineChart } from './charts';
 
 /* ============================================================
    MODULE 4 — Battery pack builder (series / parallel)
@@ -88,6 +89,7 @@ export function SolarCurveSim() {
   // find MPP
   let mpp = { v: 0, i: 0, p: 0 };
   for (let v = 0; v <= Voc; v += Voc / 200) { const i = curve(v); const pw = v * i; if (pw > mpp.p) mpp = { v, i, p: pw }; }
+  const data = Array.from({ length: 61 }, (_, k) => { const v = (k / 60) * Voc; const i = curve(v); return { x: +v.toFixed(2), i: +i.toFixed(3), p: +(v * i).toFixed(2) }; });
 
   return (
     <SimShell
@@ -100,33 +102,16 @@ export function SolarCurveSim() {
         <Slider label={L('Cell temperature', 'सेल तापमान')} value={temp} min={10} max={70} unit=" °C" color="#ef4444" onChange={setTemp} />
       </div>}
     >
-      <SimCanvas height={200} running={false} draw={({ ctx, w, h, dark }) => {
-        const p = palette(dark);
-        drawGrid(ctx, w, h, dark, 26);
-        const m = 30; const plotW = w - 2 * m, plotH = h - 2 * m;
-        const X = (v: number) => m + (v / Voc) * plotW;
-        const Yi = (i: number) => m + plotH - (i / 9) * plotH;
-        const Yp = (pw: number) => m + plotH - (pw / 140) * plotH;
-        // axes
-        ctx.strokeStyle = p.axis; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(m, m); ctx.lineTo(m, m + plotH); ctx.lineTo(m + plotW, m + plotH); ctx.stroke();
-        // I-V curve
-        ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2.5; ctx.beginPath();
-        for (let v = 0; v <= Voc; v += Voc / 120) { const x = X(v), y = Yi(curve(v)); v === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
-        ctx.stroke();
-        // P-V curve
-        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath();
-        for (let v = 0; v <= Voc; v += Voc / 120) { const x = X(v), y = Yp(v * curve(v)); v === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
-        ctx.stroke(); ctx.setLineDash([]);
-        // MPP marker
-        ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(X(mpp.v), Yi(mpp.i), 5, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(34,197,94,0.5)'; ctx.setLineDash([3, 3]);
-        ctx.beginPath(); ctx.moveTo(X(mpp.v), Yi(mpp.i)); ctx.lineTo(X(mpp.v), m + plotH); ctx.stroke(); ctx.setLineDash([]);
-        // labels
-        ctx.fillStyle = '#3b82f6'; ctx.font = '9px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('I–V', m + 6, m + 10);
-        ctx.fillStyle = '#f59e0b'; ctx.fillText('P–V', m + 36, m + 10);
-        ctx.fillStyle = p.sub; ctx.textAlign = 'right'; ctx.fillText('V →', m + plotW, m + plotH + 14);
-      }} />
+      <ProLineChart
+        data={data} xKey="x" xLabel={L('Voltage (V)', 'वोल्टेज (V)')} yLabel={L('Current (A)', 'धारा (A)')}
+        yLabelRight={L('Power (W)', 'शक्ति (W)')} height={230} decimals={0}
+        series={[
+          { key: 'i', name: L('I–V (A)', 'I–V (A)'), color: '#3b82f6', area: true },
+          { key: 'p', name: L('P–V (W)', 'P–V (W)'), color: '#f59e0b', right: true, dashed: true },
+        ]}
+        refDots={[{ x: +mpp.v.toFixed(2), y: +mpp.i.toFixed(3), color: '#22c55e', label: 'MPP' }]}
+        refLines={[{ axis: 'x', value: +mpp.v.toFixed(2), color: '#22c55e', dashed: true }]}
+      />
       <div className="grid grid-cols-4 gap-2">
         <Readout label="Isc" value={Isc.toFixed(1)} unit=" A" color="#3b82f6" />
         <Readout label="Voc" value={Voc.toFixed(1)} unit=" V" color="#ef4444" />

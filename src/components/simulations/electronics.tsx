@@ -4,6 +4,7 @@ import {
   SimCanvas, SimShell, Slider, Segmented, Readout, useLang, palette, drawGrid, roundRect,
 } from './primitives';
 import { THEMES } from './theme';
+import { ProLineChart } from './charts';
 
 /* ============================================================
    MODULE 21 — Rectifier (half / full / bridge)
@@ -176,6 +177,10 @@ export function MCBTripSim() {
   const magTrips = mult >= band[0];
   const instant = mult >= band[1];
   const tripTime = instant ? '<0.1 s' : magTrips ? '0.1–5 s' : mult > 1.45 ? '>60 s' : '—';
+  // thermal inverse-time segment up to the magnetic threshold band[1]
+  const data: Record<string, number>[] = [];
+  for (let x = 1.13; x < band[1]; x *= 1.12) data.push({ x: +x.toFixed(2), t: +Math.min(400, 80 / (x * x - 1)).toFixed(2) });
+  data.push({ x: band[1], t: +Math.min(400, 80 / (band[1] * band[1] - 1)).toFixed(2) });
 
   return (
     <SimShell
@@ -192,27 +197,17 @@ export function MCBTripSim() {
         <Slider label={L('Current as × rated', 'रेटेड का गुणक')} value={mult} min={1} max={22} step={0.5} unit=" ×In" color="#f59e0b" onChange={setMult} />
       </div>}
     >
-      <SimCanvas height={190} running={false} draw={({ ctx, w, h, dark }) => {
-        const p = palette(dark); drawGrid(ctx, w, h, dark, 26);
-        const m = 30; const pw = w - 2 * m, ph = h - 2 * m;
-        const X = (x: number) => m + (Math.log10(x) / Math.log10(25)) * pw;
-        const Y = (ty: number) => m + ph - (Math.log10(ty + 0.05) + 1.3) / 3.3 * ph;
-        ctx.strokeStyle = p.axis; ctx.lineWidth = 1.5; ctx.beginPath();
-        ctx.moveTo(m, m); ctx.lineTo(m, m + ph); ctx.lineTo(m + pw, m + ph); ctx.stroke();
-        // inverse-time thermal curve
-        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.beginPath();
-        for (let x = 1.1; x < band[1]; x += 0.1) { const ty = 80 / (x * x); const px = X(x), py = Y(ty); x === 1.1 ? ctx.moveTo(px, py) : ctx.lineTo(px, py); }
-        ctx.stroke();
-        // magnetic instantaneous drop at band[1]
-        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(X(band[1]), Y(0.1)); ctx.lineTo(X(band[1]), m + ph); ctx.stroke();
-        // marker line for selected current
-        ctx.strokeStyle = '#22c55e'; ctx.setLineDash([4, 3]); ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(X(mult), m); ctx.lineTo(X(mult), m + ph); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle = p.sub; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
-        [1, 3, 5, 10, 20].forEach((v) => ctx.fillText(`${v}×`, X(v), m + ph + 13));
-        ctx.save(); ctx.translate(10, m + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(L('trip time', 'ट्रिप समय'), 0, 0); ctx.restore();
-      }} />
+      <ProLineChart
+        data={data} xKey="x" xLabel={L('Current (× rated In)', 'धारा (× रेटेड In)')} yLabel={L('Trip time (s)', 'ट्रिप समय (s)')}
+        height={230} decimals={0} xScale="log" yScale="log"
+        xDomain={[1, 25]} yDomain={[0.01, 400]} xTicks={[1, 2, 3, 5, 10, 20]} yTicks={[0.01, 0.1, 1, 10, 100]}
+        series={[{ key: 't', name: L('Thermal (overload)', 'तापीय (ओवरलोड)'), color: '#f59e0b', width: 2.5 }]}
+        refLines={[
+          { axis: 'x', value: band[1], color: '#ef4444', label: L('magnetic', 'चुंबकीय'), dashed: false },
+          { axis: 'x', value: mult, color: '#22c55e', dashed: true },
+        ]}
+        legend={false}
+      />
       <div className="grid grid-cols-3 gap-2">
         <Readout label={L('Curve', 'वक्र')} value={`Type ${curve}`} color="#3b82f6" sub={`${band[0]}–${band[1]}× In`} />
         <Readout label={L('At this current', 'इस धारा पर')} value={tripTime} color={instant ? '#ef4444' : magTrips ? '#f59e0b' : '#22c55e'} />

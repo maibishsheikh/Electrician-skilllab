@@ -3,6 +3,7 @@ import {
   SimCanvas, SimShell, Slider, Segmented, Readout, useLang, palette, drawGrid, roundRect,
 } from './primitives';
 import { THEMES } from './theme';
+import { ProLineChart } from './charts';
 
 /* ============================================================
    MODULE 11 — Transformer turns-ratio with flux
@@ -358,6 +359,8 @@ export function DCGeneratorSim() {
   // saturation: usable flux saturates as field current rises
   const effFlux = (1 - Math.exp(-flux / 35)) * 0.012; // Wb
   const emf = (poles * effFlux * Z * speed) / (60 * A);
+  const emfAt = (f: number) => (poles * ((1 - Math.exp(-f / 35)) * 0.012) * Z * speed) / (60 * A);
+  const data = Array.from({ length: 51 }, (_, k) => { const f = k * 2; return { x: f, emf: +emfAt(f).toFixed(1) }; });
 
   return (
     <SimShell
@@ -370,26 +373,14 @@ export function DCGeneratorSim() {
         <Slider label={L('Speed', 'गति')} value={speed} min={300} max={2500} step={50} unit=" rpm" color="#ef4444" onChange={setSpeed} />
       </div>}
     >
-      <SimCanvas height={190} running={false} draw={({ ctx, w, h, dark }) => {
-        const p = palette(dark); drawGrid(ctx, w, h, dark, 26);
-        const m = 30, pw = w - 2 * m, ph = h - 2 * m;
-        ctx.strokeStyle = p.axis; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(m, m); ctx.lineTo(m, m + ph); ctx.lineTo(m + pw, m + ph); ctx.stroke();
-        // magnetisation (saturation) curve: EMF vs field current at this speed
-        ctx.strokeStyle = THEMES.dcmachine.accent; ctx.lineWidth = 2.5; ctx.beginPath();
-        const emfAt = (f: number) => (poles * ((1 - Math.exp(-f / 35)) * 0.012) * Z * speed) / (60 * A);
-        const maxE = emfAt(100);
-        for (let f = 0; f <= 100; f += 2) { const x = m + (f / 100) * pw; const y = m + ph - (emfAt(f) / (maxE * 1.05)) * ph; f === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
-        ctx.stroke();
-        // operating point
-        const ox = m + (flux / 100) * pw, oy = m + ph - (emf / (maxE * 1.05)) * ph;
-        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(ox, oy, 5, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(239,68,68,0.5)'; ctx.setLineDash([3, 3]);
-        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, m + ph); ctx.moveTo(ox, oy); ctx.lineTo(m, oy); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle = p.sub; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(L('field current →', 'फील्ड धारा →'), m + pw / 2, m + ph + 14);
-        ctx.save(); ctx.translate(12, m + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('EMF', 0, 0); ctx.restore();
-      }} />
+      <ProLineChart
+        data={data} xKey="x" xLabel={L('Field current (%)', 'फील्ड धारा (%)')} yLabel={L('EMF (V)', 'EMF (V)')}
+        height={220} decimals={0}
+        series={[{ key: 'emf', name: L('Magnetisation curve', 'चुंबकन वक्र'), color: THEMES.dcmachine.accent, area: true }]}
+        refDots={[{ x: flux, y: +emf.toFixed(1), color: '#ef4444', label: L('operating', 'कार्यबिंदु') }]}
+        refLines={[{ axis: 'x', value: flux, color: '#ef4444', dashed: true }]}
+        legend={false}
+      />
       <div className="grid grid-cols-3 gap-2">
         <Readout label={L('Generated EMF', 'उत्पन्न EMF')} value={emf.toFixed(0)} unit=" V" color={THEMES.dcmachine.accent} sub="PΦZN/60A" />
         <Readout label={L('Flux', 'फ्लक्स')} value={(effFlux * 1000).toFixed(1)} unit=" mWb" color="#f59e0b" />
