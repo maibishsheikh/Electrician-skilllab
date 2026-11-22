@@ -2,84 +2,7 @@ import { useState } from 'react';
 import {
   SimCanvas, SimShell, Slider, Segmented, Readout, useLang, palette, drawGrid, roundRect,
 } from './primitives';
-
-/* ============================================================
-   MODULE 1 — Electric Shock & RCCB simulator
-   ============================================================ */
-export function ShockSim() {
-  const L = useLang();
-  const [mA, setMa] = useState(15);
-  const rccb = mA >= 30;
-
-  const band = (() => {
-    if (mA < 1) return { en: 'Not perceptible', hi: 'महसूस नहीं होता', c: '#22c55e' };
-    if (mA < 5) return { en: 'Slight perception / tingling', hi: 'हल्की झनझनाहट', c: '#84cc16' };
-    if (mA < 10) return { en: 'Painful, muscle control retained', hi: 'दर्दनाक, नियंत्रण बना रहता है', c: '#eab308' };
-    if (mA < 16) return { en: 'Let-go threshold exceeded — cannot release', hi: 'लेट-गो सीमा पार — छोड़ नहीं सकते', c: '#f59e0b' };
-    if (mA < 30) return { en: 'Severe shock, breathing difficulty', hi: 'गंभीर झटका, सांस लेने में कठिनाई', c: '#f97316' };
-    if (mA < 100) return { en: 'Ventricular fibrillation likely', hi: 'वेंट्रिकुलर फिब्रिलेशन संभव', c: '#ef4444' };
-    return { en: 'Cardiac arrest, severe burns', hi: 'हृदयाघात, गंभीर जलन', c: '#dc2626' };
-  })();
-
-  return (
-    <SimShell
-      title={L('Electric Shock & RCCB Response', 'बिजली का झटका एवं RCCB प्रतिक्रिया')}
-      subtitle={L('Drag the current to see its effect on the body and when a 30 mA RCCB trips.',
-        'शरीर पर प्रभाव और 30 mA RCCB कब ट्रिप करता है, देखने के लिए धारा खिसकाएं।')}
-      controls={<Slider label={L('Body current', 'शरीर धारा')} value={mA} min={0} max={200} step={1} unit=" mA" color={band.c} onChange={setMa} />}
-    >
-      <SimCanvas height={200} draw={({ ctx, w, h, t, dark }) => {
-        const p = palette(dark);
-        drawGrid(ctx, w, h, dark, 28);
-        const cx = w * 0.3, topY = 24;
-        // current flows while > 1mA
-        const flowing = mA >= 1;
-        const intensity = Math.min(1, mA / 100);
-        // body (head + torso + legs)
-        ctx.strokeStyle = flowing ? band.c : p.sub;
-        ctx.lineWidth = 2 + intensity * 4;
-        ctx.fillStyle = flowing ? `${band.c}22` : 'transparent';
-        ctx.beginPath(); ctx.arc(cx, topY + 14, 13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        roundRect(ctx, cx - 16, topY + 28, 32, 64, 10); ctx.fill(); ctx.stroke();
-        // arm to live wire (right), leg to earth (down)
-        ctx.beginPath();
-        ctx.moveTo(cx + 14, topY + 40); ctx.lineTo(w * 0.72, topY + 40); // arm -> live
-        ctx.moveTo(cx - 8, topY + 92); ctx.lineTo(cx - 8, h - 14);       // leg -> earth
-        ctx.moveTo(cx + 8, topY + 92); ctx.lineTo(cx + 8, h - 14);
-        ctx.stroke();
-        // live source
-        ctx.fillStyle = p.live; roundRect(ctx, w * 0.72, topY + 28, 26, 26, 5); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.font = 'bold 12px monospace'; ctx.textAlign = 'center';
-        ctx.fillText('~', w * 0.72 + 13, topY + 45);
-        // earth hatch
-        ctx.strokeStyle = p.earth; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(w * 0.1, h - 12); ctx.lineTo(w * 0.5, h - 12); ctx.stroke();
-        for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(w * 0.14 + i * 18, h - 12); ctx.lineTo(w * 0.1 + i * 18, h - 4); ctx.stroke(); }
-        // animated current particles
-        if (flowing) {
-          const n = 3 + Math.floor(intensity * 8);
-          ctx.fillStyle = band.c;
-          for (let i = 0; i < n; i++) {
-            const ph = (t * (0.6 + intensity * 2.5) + i / n) % 1;
-            // path: live -> arm -> body -> leg -> earth
-            let x, y;
-            if (ph < 0.45) { const k = ph / 0.45; x = w * 0.72 - k * (w * 0.72 - cx - 14); y = topY + 40; }
-            else { const k = (ph - 0.45) / 0.55; x = cx; y = topY + 40 + k * (h - 14 - topY - 40); }
-            ctx.beginPath(); ctx.arc(x, y, 2.5 + intensity * 2, 0, Math.PI * 2); ctx.fill();
-          }
-        }
-        // RCCB indicator
-        ctx.textAlign = 'left';
-        ctx.font = 'bold 11px sans-serif';
-        if (rccb) { ctx.fillStyle = '#22c55e'; ctx.fillText(L('⚡ RCCB TRIPPED — circuit cut in <30ms', '⚡ RCCB ट्रिप — सर्किट <30ms में कटा'), 10, 16); }
-        else { ctx.fillStyle = p.warn; ctx.fillText(L('RCCB not yet tripping (needs 30 mA)', 'RCCB अभी ट्रिप नहीं (30 mA चाहिए)'), 10, 16); }
-      }} />
-      <div className="rounded-lg px-3 py-2 text-sm font-medium" style={{ background: `${band.c}1a`, color: band.c }}>
-        {mA} mA → {L(band.en, band.hi)}
-      </div>
-    </SimShell>
-  );
-}
+import { THEMES } from './theme';
 
 /* ============================================================
    MODULE 3 — Ohm's Law with live electron flow
@@ -94,6 +17,7 @@ export function OhmsLawSim() {
 
   return (
     <SimShell
+      accent={THEMES.circuit.accent} Icon={THEMES.circuit.Icon}
       title={L("Ohm's Law — Live Circuit", 'ओम का नियम — सजीव सर्किट')}
       subtitle={L('Change voltage and resistance; watch current, power and electron flow respond in real time.',
         'वोल्टेज और प्रतिरोध बदलें; धारा, शक्ति और इलेक्ट्रॉन प्रवाह को वास्तविक समय में देखें।')}
@@ -171,6 +95,7 @@ export function SeriesParallelSim() {
 
   return (
     <SimShell
+      accent={THEMES.circuit.accent} Icon={THEMES.circuit.Icon}
       title={L('Series ↔ Parallel Networks', 'श्रेणी ↔ समानांतर नेटवर्क')}
       subtitle={L('Switch the connection and resize each resistor. Equivalent resistance and branch currents update live.',
         'कनेक्शन बदलें और प्रत्येक प्रतिरोधक बदलें। तुल्य प्रतिरोध और धाराएं तुरंत बदलती हैं।')}
@@ -242,6 +167,7 @@ export function WheatstoneSim() {
 
   return (
     <SimShell
+      accent={THEMES.meter.accent} Icon={THEMES.meter.Icon}
       title={L('Wheatstone Bridge — Balance It', 'व्हीटस्टोन ब्रिज — संतुलित करें')}
       subtitle={L('Adjust R₃ until the galvanometer reads zero. Then Rx = R₃·R₂/R₁ gives the unknown resistor.',
         'गैल्वेनोमीटर शून्य होने तक R₃ समायोजित करें। तब Rx = R₃·R₂/R₁ अज्ञात प्रतिरोध देता है।')}
@@ -301,6 +227,7 @@ export function ACWaveformSim() {
 
   return (
     <SimShell
+      accent={THEMES.circuit.accent} Icon={THEMES.circuit.Icon}
       title={L('AC Waveform Generator', 'AC तरंग जनरेटर')}
       subtitle={L('Indian mains is 230 V RMS, 50 Hz. See how peak, RMS and average relate on a live sine wave.',
         'भारतीय मेन्स 230 V RMS, 50 Hz है। शिखर, RMS और औसत का संबंध सजीव साइन तरंग पर देखें।')}

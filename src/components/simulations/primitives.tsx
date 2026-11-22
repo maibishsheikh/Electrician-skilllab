@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useAppStore } from '@/context/store';
+import type { LucideIcon } from 'lucide-react';
+import { withAlpha } from './theme';
 
 /* ============================================================
    Shared helpers & UI primitives for interactive simulations.
@@ -244,15 +246,32 @@ export function Readout({ label, value, unit = '', color = '#3b82f6', sub }: {
   );
 }
 
-/** Standard wrapper so every simulation looks like one system. */
-export function SimShell({ title, subtitle, children, controls }: {
+/** Standard wrapper so every simulation looks like one system. Themed by `accent`. */
+export function SimShell({ title, subtitle, children, controls, accent = '#2563eb', Icon }: {
   title: string; subtitle?: string; children: React.ReactNode; controls?: React.ReactNode;
+  accent?: string; Icon?: LucideIcon;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-gradient-to-br from-white to-slate-50 dark:from-surface-dark-1 dark:to-surface-dark-0">
-      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-white/5">
-        <h3 className="font-bold text-sm flex items-center gap-2">🔬 {title}</h3>
-        {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
+    <div
+      className="rounded-2xl border overflow-hidden bg-white dark:bg-surface-dark-1 shadow-sm"
+      style={{ borderColor: withAlpha(accent, 0.25) }}
+    >
+      <div
+        className="px-4 py-3 border-b flex items-start gap-3"
+        style={{ borderColor: withAlpha(accent, 0.18), background: `linear-gradient(90deg, ${withAlpha(accent, 0.12)}, transparent)` }}
+      >
+        {Icon && (
+          <span
+            className="flex-shrink-0 grid place-items-center w-9 h-9 rounded-xl"
+            style={{ background: withAlpha(accent, 0.15), color: accent }}
+          >
+            <Icon size={18} strokeWidth={2.2} />
+          </span>
+        )}
+        <div className="min-w-0">
+          <h3 className="font-bold text-sm leading-tight" style={{ color: accent }}>{title}</h3>
+          {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
+        </div>
       </div>
       <div className="p-4 space-y-4">
         {children}

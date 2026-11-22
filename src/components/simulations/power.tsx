@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Lightbulb, Fan, Refrigerator, AirVent, ShowerHead, Tv, type LucideIcon } from 'lucide-react';
 import {
   SimCanvas, SimShell, Slider, Segmented, Readout, Toggle, useLang, palette, drawGrid, roundRect,
 } from './primitives';
+import { THEMES } from './theme';
 
 /* ============================================================
    MODULE 4 — Battery pack builder (series / parallel)
@@ -19,6 +21,7 @@ export function BatteryPackSim() {
 
   return (
     <SimShell
+      accent={THEMES.energy.accent} Icon={THEMES.energy.Icon}
       title={L('Battery Pack Builder', 'बैटरी पैक बिल्डर')}
       subtitle={L('Series cells add voltage; parallel strings add capacity. Build a pack and watch it charge/discharge.',
         'श्रेणी सेल वोल्टेज बढ़ाते हैं; समानांतर स्ट्रिंग क्षमता बढ़ाते हैं। पैक बनाएं और चार्ज/डिस्चार्ज देखें।')}
@@ -88,6 +91,7 @@ export function SolarCurveSim() {
 
   return (
     <SimShell
+      accent={THEMES.solar.accent} Icon={THEMES.solar.Icon}
       title={L('Solar Panel I–V / P–V Curve', 'सोलर पैनल I–V / P–V वक्र')}
       subtitle={L('More sunlight lifts current; higher temperature lowers voltage. The knee is the Maximum Power Point.',
         'अधिक धूप धारा बढ़ाती है; अधिक तापमान वोल्टेज घटाता है। घुटना अधिकतम पावर बिंदु है।')}
@@ -149,6 +153,7 @@ export function IlluminationSim() {
 
   return (
     <SimShell
+      accent={THEMES.light.accent} Icon={THEMES.light.Icon}
       title={L('Illumination — Inverse Square Law', 'प्रकाश — व्युत्क्रम वर्ग नियम')}
       subtitle={L('Lux on the floor = luminous intensity ÷ distance². Doubling the height quarters the light.',
         'फर्श पर लक्स = ज्योति तीव्रता ÷ दूरी²। ऊंचाई दोगुनी करने पर प्रकाश चौथाई हो जाता है।')}
@@ -197,12 +202,12 @@ export function IlluminationSim() {
    MODULE 10 — Appliance energy & electricity bill
    ============================================================ */
 const APPLIANCES = [
-  { en: 'LED bulb', hi: 'LED बल्ब', w: 9, icon: '💡' },
-  { en: 'Ceiling fan', hi: 'पंखा', w: 75, icon: '🌀' },
-  { en: 'Refrigerator', hi: 'फ्रिज', w: 150, icon: '🧊' },
-  { en: 'Air conditioner', hi: 'एयर कंडीशनर', w: 1500, icon: '❄️' },
-  { en: 'Geyser', hi: 'गीजर', w: 2000, icon: '🚿' },
-  { en: 'TV', hi: 'टीवी', w: 100, icon: '📺' },
+  { en: 'LED bulb', hi: 'LED बल्ब', w: 9, Icon: Lightbulb as LucideIcon },
+  { en: 'Ceiling fan', hi: 'पंखा', w: 75, Icon: Fan as LucideIcon },
+  { en: 'Refrigerator', hi: 'फ्रिज', w: 150, Icon: Refrigerator as LucideIcon },
+  { en: 'Air conditioner', hi: 'एयर कंडीशनर', w: 1500, Icon: AirVent as LucideIcon },
+  { en: 'Geyser', hi: 'गीजर', w: 2000, Icon: ShowerHead as LucideIcon },
+  { en: 'TV', hi: 'टीवी', w: 100, Icon: Tv as LucideIcon },
 ];
 export function EnergyBillSim() {
   const L = useLang();
@@ -214,6 +219,7 @@ export function EnergyBillSim() {
 
   return (
     <SimShell
+      accent={THEMES.appliance.accent} Icon={THEMES.appliance.Icon}
       title={L('Energy Meter & Bill Estimator', 'ऊर्जा मीटर एवं बिल अनुमानक')}
       subtitle={L('Units (kWh) = Power(kW) × hours. Adjust daily usage and tariff to see the monthly bill.',
         'यूनिट (kWh) = शक्ति(kW) × घंटे। दैनिक उपयोग व टैरिफ बदलकर मासिक बिल देखें।')}
@@ -222,7 +228,7 @@ export function EnergyBillSim() {
       <div className="space-y-2">
         {APPLIANCES.map((a, i) => (
           <div key={i} className="flex items-center gap-3">
-            <span className="text-lg w-6 text-center">{a.icon}</span>
+            <a.Icon size={18} className="w-6 flex-shrink-0 text-slate-500 dark:text-slate-400" />
             <span className="text-xs font-medium w-24 flex-shrink-0">{L(a.en, a.hi)}</span>
             <span className="text-[10px] text-slate-400 w-12">{a.w}W</span>
             <input type="range" min={0} max={24} value={hours[i]}
@@ -257,6 +263,7 @@ export function VoltageDropSim() {
 
   return (
     <SimShell
+      accent={THEMES.cable.accent} Icon={THEMES.cable.Icon}
       title={L('Cable Voltage Drop', 'केबल वोल्टेज ड्रॉप')}
       subtitle={L('Long thin cables lose voltage. IS code limit is ~3%. Size the conductor so the load still gets its volts.',
         'लंबी पतली केबल वोल्टेज खोती है। IS कोड सीमा ~3% है। चालक इतना बड़ा चुनें कि लोड को वोल्टेज मिले।')}
@@ -305,6 +312,7 @@ export function EVChargingSim() {
 
   return (
     <SimShell
+      accent={THEMES.ev.accent} Icon={THEMES.ev.Icon}
       title={L('EV Charging Time', 'EV चार्जिंग समय')}
       subtitle={L('Charge time = energy needed ÷ charger power. DC fast chargers fill 20→80% far quicker than AC.',
         'चार्ज समय = आवश्यक ऊर्जा ÷ चार्जर शक्ति। DC फास्ट चार्जर 20→80% AC से बहुत तेज भरते हैं।')}

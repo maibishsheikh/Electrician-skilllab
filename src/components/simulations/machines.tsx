@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   SimCanvas, SimShell, Slider, Segmented, Readout, useLang, palette, drawGrid, roundRect,
 } from './primitives';
+import { THEMES } from './theme';
 
 /* ============================================================
    MODULE 11 — Transformer turns-ratio with flux
@@ -17,6 +18,7 @@ export function TransformerSim() {
 
   return (
     <SimShell
+      accent={THEMES.transformer.accent} Icon={THEMES.transformer.Icon}
       title={L('Transformer Turns Ratio', 'ट्रांसफॉर्मर टर्न अनुपात')}
       subtitle={L('V₁/V₂ = N₁/N₂. Flux in the core links both windings — change the turns and watch the output volts.',
         'V₁/V₂ = N₁/N₂। कोर में फ्लक्स दोनों वाइंडिंग को जोड़ता है — टर्न बदलें और आउटपुट वोल्ट देखें।')}
@@ -83,6 +85,7 @@ export function ThreePhaseSim() {
   const vLine = vph * Math.SQRT2 * 0 + vph * 1.732; // √3 Vph
   return (
     <SimShell
+      accent={THEMES.sync.accent} Icon={THEMES.sync.Icon}
       title={L('Three-Phase Supply', 'तीन-फेज आपूर्ति')}
       subtitle={L('R, Y, B are 120° apart. In star, line voltage = √3 × phase voltage. Watch the phasors rotate.',
         'R, Y, B 120° अलग हैं। स्टार में लाइन वोल्टेज = √3 × फेज वोल्टेज। फेजर घूमते देखें।')}
@@ -137,6 +140,7 @@ export function RMFSim() {
 
   return (
     <SimShell
+      accent={THEMES.acmotor.accent} Icon={THEMES.acmotor.Icon}
       title={L('Rotating Magnetic Field (Induction Motor)', 'घूर्णन चुंबकीय क्षेत्र (प्रेरण मोटर)')}
       subtitle={L('Three stator currents create a field that spins at synchronous speed. The rotor chases it, always a little behind (slip).',
         'तीन स्टेटर धाराएं एक क्षेत्र बनाती हैं जो तुल्यकाली गति से घूमता है। रोटर उसका पीछा करता है, हमेशा थोड़ा पीछे (स्लिप)।')}
@@ -203,6 +207,7 @@ export function DCMotorSim() {
 
   return (
     <SimShell
+      accent={THEMES.dcmachine.accent} Icon={THEMES.dcmachine.Icon}
       title={L('DC Motor — Back-EMF & Speed', 'DC मोटर — बैक-EMF एवं गति')}
       subtitle={L('As load rises, armature current climbs, back-EMF drops and the motor slows. V = Eb + Ia·Ra.',
         'लोड बढ़ने पर आर्मेचर धारा बढ़ती है, बैक-EMF घटती है और मोटर धीमी होती है। V = Eb + Ia·Ra।')}
@@ -256,6 +261,7 @@ export function AlternatorSim() {
   const ok = Math.abs(f - 50) < 0.5;
   return (
     <SimShell
+      accent={THEMES.alternator.accent} Icon={THEMES.alternator.Icon}
       title={L('Alternator Frequency', 'अल्टरनेटर आवृत्ति')}
       subtitle={L('Grid frequency must be 50 Hz. Match poles and speed so that f = P·N/120 = 50.',
         'ग्रिड आवृत्ति 50 Hz होनी चाहिए। ध्रुव व गति ऐसे मिलाएं कि f = P·N/120 = 50।')}
@@ -297,6 +303,7 @@ export function StarDeltaSim() {
 
   return (
     <SimShell
+      accent={THEMES.acmotor.accent} Icon={THEMES.acmotor.Icon}
       title={L('Star ↔ Delta Connection', 'स्टार ↔ डेल्टा कनेक्शन')}
       subtitle={L('Star: V_line = √3·V_phase, I_line = I_phase. Delta: V_line = V_phase, I_line = √3·I_phase. This is why star-delta starters cut starting current to ⅓.',
         'स्टार: V_लाइन = √3·V_फेज। डेल्टा: I_लाइन = √3·I_फेज। इसीलिए स्टार-डेल्टा स्टार्टर प्रारंभिक धारा ⅓ कर देता है।')}

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/context/store';
 import { getModuleSimulation } from '@/components/simulations';
+import { moduleContentData } from '@/data/moduleContentData';
 
 // Detailed content for each module's 7-stage learning journey
 const moduleContent: Record<number, {
@@ -375,7 +376,9 @@ export default function ModuleDetail() {
     );
   }
 
-  const content = moduleContent[outcomeId] || getDefaultContent(outcome);
+  const baseContent = moduleContent[outcomeId] || getDefaultContent(outcome);
+  const extraContent = moduleContentData[outcomeId];
+  const content = extraContent ? { ...baseContent, ...extraContent } : baseContent;
 
   const handleStartLearning = () => {
     if (outcome.status === 'available') {

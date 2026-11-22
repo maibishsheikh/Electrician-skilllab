@@ -1,5 +1,6 @@
 import { ComponentType } from 'react';
-import { ShockSim, OhmsLawSim, SeriesParallelSim, WheatstoneSim, ACWaveformSim } from './basics';
+import { SafetySim } from './safety';
+import { OhmsLawSim, SeriesParallelSim, WheatstoneSim, ACWaveformSim } from './basics';
 import { BatteryPackSim, SolarCurveSim, IlluminationSim, EnergyBillSim, VoltageDropSim, EVChargingSim } from './power';
 import { TransformerSim, ThreePhaseSim, RMFSim, DCMotorSim, AlternatorSim, StarDeltaSim } from './machines';
 import { RectifierSim, PWMSim, InverterSim, MCBTripSim, LadderLogicSim } from './electronics';
@@ -11,7 +12,7 @@ import { WiringSwitchSim, SymbolMatchSim } from './wiring';
  * Some sims serve two closely-related modules (e.g. DC machine build & maintain).
  */
 export const moduleSimulations: Record<number, ComponentType> = {
-  1: ShockSim,            // Workshop Readiness & Safety
+  1: SafetySim,           // Workshop Readiness & Safety
   2: VoltageDropSim,      // Wire Joints & Cable Testing (conductor resistance)
   3: OhmsLawSim,          // Electrical & Magnetic Circuits
   4: BatteryPackSim,      // Batteries & Solar Cells

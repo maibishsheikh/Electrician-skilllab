@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
+import { Check, X } from 'lucide-react';
 import {
   SimCanvas, SimShell, Segmented, Readout, useLang, palette, drawGrid,
 } from './primitives';
+import { THEMES } from './theme';
 
 /* ============================================================
    MODULE 5 — Two-way / godown switching (interactive)
@@ -17,6 +19,7 @@ export function WiringSwitchSim() {
 
   return (
     <SimShell
+      accent={THEMES.wiring.accent} Icon={THEMES.wiring.Icon}
       title={L('Two-Way & Godown Switching', 'टू-वे एवं गोदाम स्विचिंग')}
       subtitle={L('Control one lamp from two (or more) places. Flip any switch — the lamp toggles, just like a real staircase circuit.',
         'एक लैंप को दो (या अधिक) जगहों से नियंत्रित करें। कोई भी स्विच पलटें — लैंप टॉगल होता है, असली सीढ़ी सर्किट की तरह।')}
@@ -83,7 +86,7 @@ export function WiringSwitchSim() {
         }
       }} />
       <div className="grid grid-cols-2 gap-2">
-        <Readout label={L('Lamp', 'लैंप')} value={lampOn ? L('ON 💡', 'चालू 💡') : L('OFF', 'बंद')} color={lampOn ? '#eab308' : '#64748b'} />
+        <Readout label={L('Lamp', 'लैंप')} value={lampOn ? L('ON', 'चालू') : L('OFF', 'बंद')} color={lampOn ? '#eab308' : '#64748b'} />
         <Readout label={L('Switches', 'स्विच')} value={mode === 'two' ? '2 × SPDT' : '2×SPDT + 1 interm.'} color="#3b82f6" sub={L('each place can toggle', 'हर जगह टॉगल कर सकती है')} />
       </div>
     </SimShell>
@@ -131,6 +134,7 @@ export function SymbolMatchSim() {
 
   return (
     <SimShell
+      accent={THEMES.drawing.accent} Icon={THEMES.drawing.Icon}
       title={L('Electrical Symbol Match', 'विद्युत प्रतीक मिलान')}
       subtitle={L('Identify the schematic symbol — the language of wiring diagrams. Build speed before your drawing exam.',
         'योजनाबद्ध प्रतीक पहचानें — वायरिंग आरेख की भाषा। ड्राइंग परीक्षा से पहले गति बनाएं।')}
@@ -143,7 +147,7 @@ export function SymbolMatchSim() {
                 state === 'correct' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
                 : state === 'wrong' ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
                 : 'border-slate-200 dark:border-slate-700 hover:border-brand-400'}`}>
-              {L(o.en, o.hi)}{state === 'correct' ? ' ✅' : state === 'wrong' ? ' ❌' : ''}
+              <span className="inline-flex items-center gap-1">{L(o.en, o.hi)}{state === 'correct' ? <Check size={14} /> : state === 'wrong' ? <X size={14} /> : null}</span>
             </button>
           );
         })}

@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Play, Square, Zap, RotateCcw } from 'lucide-react';
 import {
   SimCanvas, SimShell, Slider, Segmented, Readout, useLang, palette, drawGrid, roundRect,
 } from './primitives';
+import { THEMES } from './theme';
 
 /* ============================================================
    MODULE 21 — Rectifier (half / full / bridge)
@@ -16,6 +18,7 @@ export function RectifierSim() {
 
   return (
     <SimShell
+      accent={THEMES.electronics.accent} Icon={THEMES.electronics.Icon}
       title={L('Rectifier — AC to DC', 'रेक्टिफायर — AC से DC')}
       subtitle={L('Diodes let current pass one way. Half-wave uses one diode; full-wave/bridge use the whole cycle. A capacitor smooths the output.',
         'डायोड धारा को एक दिशा में जाने देते हैं। हाफ-वेव एक डायोड; फुल-वेव/ब्रिज पूरा चक्र। कैपेसिटर आउटपुट को चिकना करता है।')}
@@ -76,6 +79,7 @@ export function PWMSim() {
 
   return (
     <SimShell
+      accent={THEMES.drive.accent} Icon={THEMES.drive.Icon}
       title={L('PWM Speed Control', 'PWM गति नियंत्रण')}
       subtitle={L('Switching DC on and off fast sets the average voltage. Wider ON pulses (higher duty) run the motor faster.',
         'DC को तेजी से ऑन/ऑफ करने से औसत वोल्टेज तय होता है। चौड़ी ON पल्स (अधिक ड्यूटी) मोटर तेज चलाती है।')}
@@ -125,6 +129,7 @@ export function InverterSim() {
 
   return (
     <SimShell
+      accent={THEMES.inverter.accent} Icon={THEMES.inverter.Icon}
       title={L('Inverter — DC to AC', 'इन्वर्टर — DC से AC')}
       subtitle={L('An inverter builds AC from a DC battery. Pure sine is cleanest; square/modified are cheaper but harsher on motors and electronics.',
         'इन्वर्टर DC बैटरी से AC बनाता है। प्योर साइन सबसे साफ; स्क्वायर/मॉडिफाइड सस्ते पर मोटर/इलेक्ट्रॉनिक्स के लिए कठोर।')}
@@ -174,6 +179,7 @@ export function MCBTripSim() {
 
   return (
     <SimShell
+      accent={THEMES.protection.accent} Icon={THEMES.protection.Icon}
       title={L('MCB Trip Characteristics', 'MCB ट्रिप विशेषताएं')}
       subtitle={L('Type B, C, D differ in how big an overcurrent they tolerate before instant trip. Pick the curve for the load’s inrush.',
         'टाइप B, C, D तुरंत ट्रिप से पहले कितनी अधिक धारा सहन करते हैं, इसमें भिन्न हैं। लोड के इनरश हेतु वक्र चुनें।')}
@@ -231,14 +237,15 @@ export function LadderLogicSim() {
 
   return (
     <SimShell
+      accent={THEMES.control.accent} Icon={THEMES.control.Icon}
       title={L('DOL Starter — Hold-On Logic', 'DOL स्टार्टर — होल्ड-ऑन लॉजिक')}
       subtitle={L('Press START: the contactor latches through its own auxiliary contact and keeps the motor running. STOP or overload breaks the hold.',
         'START दबाएं: कॉन्टैक्टर अपने सहायक संपर्क से लैच होकर मोटर चालू रखता है। STOP या ओवरलोड होल्ड तोड़ता है।')}
       controls={<div className="flex flex-wrap gap-2">
-        <button onClick={start} disabled={tripped} className="px-4 py-2 rounded-lg text-xs font-bold bg-green-500 text-white disabled:opacity-40 active:scale-95 transition">▶ START</button>
-        <button onClick={stop} className="px-4 py-2 rounded-lg text-xs font-bold bg-red-500 text-white active:scale-95 transition">■ STOP</button>
-        <button onClick={overload} className="px-4 py-2 rounded-lg text-xs font-bold bg-amber-500 text-white active:scale-95 transition">⚡ {L('Overload', 'ओवरलोड')}</button>
-        {tripped && <button onClick={reset} className="px-4 py-2 rounded-lg text-xs font-bold bg-slate-500 text-white active:scale-95 transition">↺ {L('Reset', 'रीसेट')}</button>}
+        <button onClick={start} disabled={tripped} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-green-500 text-white disabled:opacity-40 active:scale-95 transition"><Play size={13} /> START</button>
+        <button onClick={stop} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-red-500 text-white active:scale-95 transition"><Square size={13} /> STOP</button>
+        <button onClick={overload} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-amber-500 text-white active:scale-95 transition"><Zap size={13} /> {L('Overload', 'ओवरलोड')}</button>
+        {tripped && <button onClick={reset} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-slate-500 text-white active:scale-95 transition"><RotateCcw size={13} /> {L('Reset', 'रीसेट')}</button>}
       </div>}
     >
       <SimCanvas height={180} running draw={({ ctx, w, h, t, dark }) => {
