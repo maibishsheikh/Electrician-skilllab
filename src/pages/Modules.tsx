@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useAppStore } from '@/context/store';
 
 const statusColors: Record<string, string> = {
@@ -30,9 +31,10 @@ export default function Modules() {
       </h2>
       <div className="grid gap-3">
         {list.map((outcome) => (
-          <div
+          <Link
+            to={`/modules/${outcome.id}`}
             key={outcome.id}
-            className="card p-4 transition-all card-hover cursor-pointer"
+            className="card p-4 transition-all card-hover cursor-pointer block"
           >
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-sm font-bold text-brand-700 dark:text-brand-300 flex-shrink-0">
@@ -72,7 +74,7 @@ export default function Modules() {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
